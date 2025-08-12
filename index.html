@@ -552,7 +552,6 @@
         import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, onSnapshot, query, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'hot-alerts-app';
-        window.appId = appId; // Expose for import script
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
               apiKey: "AIzaSyCKJAYbGCKjxR3YpucDfGXDz9SuyBECb1I",
               authDomain: "hot-alerts.firebaseapp.com",
@@ -567,9 +566,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Expose the db instance to the window for the import script
-        window.db = db;
-
         let userId = null;
         let userTemplatesRef = null;
         let publicTemplatesRef = null;
@@ -577,6 +573,100 @@
         let settingsDocRef = null;
         let unsubscribeFromTemplates = null; 
         let justAuthenticated = false;
+
+        // --- ONE-TIME DATA IMPORT SCRIPT ---
+        async function batchImportCdjrData() {
+            const vehicleData = [
+              { "brand": "Chrysler", "category": "current", "description": "The modern successor to the Town & Country. Also available as a class-leading Plug-in Hybrid (PHEV).", "modelName": "Chrysler Pacifica", "years": "Minivan | 2017-Present" },
+              { "brand": "Chrysler", "category": "current", "description": "Initially a budget-friendly version of the Pacifica, later transitioned to a fleet-exclusive model.", "modelName": "Chrysler Voyager", "years": "Minivan | 2020-Present" },
+              { "brand": "Chrysler", "category": "current", "description": "Represents the brand's future direction, pivoting towards an all-electric, premium crossover.", "modelName": "(Upcoming EV Crossover)", "years": "Crossover SUV | 2025/2026 (Expected)" },
+              { "brand": "Chrysler", "category": "past", "description": "An iconic rear-wheel-drive American sedan known for its bold styling and available HEMI V8 power.", "modelName": "Chrysler 300 / 300C", "years": "Full-Size Sedan | 2005-2023" },
+              { "brand": "Chrysler", "category": "past", "description": "Successor to the Sebring, offered with an advanced all-wheel-drive system.", "modelName": "Chrysler 200", "years": "Mid-Size Sedan | 2011-2017" },
+              { "brand": "Chrysler", "category": "past", "description": "The brand's flagship luxury minivan for decades, pioneering features like Stow 'n Go seating.", "modelName": "Chrysler Town & Country", "years": "Minivan | 1990-2016" },
+              { "brand": "Chrysler", "category": "past", "description": "A short-lived luxury SUV based on the Dodge Durango, notable for its available hybrid powertrain.", "modelName": "Chrysler Aspen", "years": "Full-Size SUV | 2007-2009" },
+              { "brand": "Chrysler", "category": "past", "description": "A family of influential \"cab-forward\" sedans that maximized interior space and defined 90s design.", "modelName": "Chrysler Concorde / LHS / 300M", "years": "Full-Size Sedan | 1993-2004" },
+              { "brand": "Chrysler", "category": "past", "description": "Long-running nameplates representing the peak of Chrysler luxury in the early 90s.", "modelName": "Chrysler New Yorker / Imperial", "years": "Full-Size Luxury Sedan | to 1996" },
+              { "brand": "Chrysler", "category": "past", "description": "A key member of the \"cloud cars\" (alongside Dodge Stratus), praised for its modern design.", "modelName": "Chrysler Cirrus", "years": "Mid-Size Sedan | 1995-2000" },
+              { "brand": "Chrysler", "category": "past", "description": "A cultural phenomenon, this retro-styled compact car offered unique versatility and a convertible model.", "modelName": "Chrysler PT Cruiser", "years": "Compact Hatchback | 2001-2010" },
+              { "brand": "Chrysler", "category": "past", "description": "A versatile nameplate used on multiple body styles, best known for its popular convertible version.", "modelName": "Chrysler Sebring", "years": "Mid-Size Sedan/Coupe/Convertible | 1995-2010" },
+              { "brand": "Chrysler", "category": "past", "description": "A unique sports car from the Daimler-Chrysler era, based on the Mercedes-Benz SLK platform.", "modelName": "Chrysler Crossfire", "years": "Sports Car | 2004-2008" },
+              { "brand": "Chrysler", "category": "past", "description": "A factory-built hot rod with an aluminum chassis. Initially launched as a Plymouth.", "modelName": "Chrysler Prowler", "years": "Sports Car | 1997-2002" },
+              { "brand": "Jeep", "category": "current", "description": "The undisputed icon of off-roading. Now in its JL generation, it includes the innovative 4xe Plug-in Hybrid model.", "modelName": "Jeep Wrangler", "years": "Off-Road SUV | 1987-Present" },
+              { "brand": "Jeep", "category": "current", "description": "Combines the open-air freedom and off-road capability of a Wrangler with the utility of a pickup truck bed.", "modelName": "Jeep Gladiator", "years": "Mid-Size Pickup | 2020-Present" },
+              { "brand": "Jeep", "category": "current", "description": "The benchmark for premium SUVs. Available in 2-row, 3-row (L), and 4xe PHEV versions.", "modelName": "Jeep Grand Cherokee", "years": "Mid-Size SUV | 1993-Present" },
+              { "brand": "Jeep", "category": "current", "description": "The return of a classic nameplate, representing the pinnacle of premium for the Jeep brand.", "modelName": "Jeep Wagoneer / Grand Wagoneer", "years": "Full-Size SUV | 2022-Present" },
+              { "brand": "Jeep", "category": "current", "description": "A global compact SUV, now in its second, more refined generation.", "modelName": "Jeep Compass", "years": "Compact Crossover | 2007-Present" },
+              { "brand": "Jeep", "category": "current", "description": "Jeep's entry into the subcompact segment with distinctive styling.", "modelName": "Jeep Renegade", "years": "Subcompact Crossover | 2015-Present" },
+              { "brand": "Jeep", "category": "current", "description": "Spearheading Jeep's electric future. The Recon is a rugged EV, while the Wagoneer S is a sleek, performance luxury EV.", "modelName": "Jeep Recon & Wagoneer S", "years": "Electric SUV | 2025 (Expected)" },
+              { "brand": "Jeep", "category": "past", "description": "The original XJ defined the modern SUV. The name was revived for the modern KL crossover.", "modelName": "Jeep Cherokee (XJ & KL)", "years": "Compact SUV | 1984-2001 & 2014-2023" },
+              { "brand": "Jeep", "category": "past", "description": "The pickup truck version of the legendary Cherokee XJ, prized by collectors.", "modelName": "Jeep Comanche (MJ)", "years": "Compact Pickup | 1985-1992" },
+              { "brand": "Jeep", "category": "past", "description": "The successor to the classic Cherokee, it featured independent front suspension for two generations.", "modelName": "Jeep Liberty", "years": "Compact SUV | 2002-2012" },
+              { "brand": "Jeep", "category": "past", "description": "A rugged, boxy, three-row SUV based on the Grand Cherokee platform.", "modelName": "Jeep Commander", "years": "Mid-Size SUV | 2006-2010" },
+              { "brand": "Jeep", "category": "past", "description": "A more traditionally styled, boxy counterpart to the first-generation Compass.", "modelName": "Jeep Patriot", "years": "Compact Crossover | 2007-2017" },
+              { "brand": "Dodge", "category": "current", "description": "The latest iteration offers both all-electric (Daytona) and twin-turbo I6 (Sixpack) powertrains.", "modelName": "Dodge Charger", "years": "Muscle Car | 2006-Present" },
+              { "brand": "Dodge", "category": "current", "description": "Dodge's entry into the performance CUV segment, offering a powerful R/T PHEV model.", "modelName": "Dodge Hornet", "years": "Compact Crossover | 2023-Present" },
+              { "brand": "Dodge", "category": "current", "description": "The \"three-row Charger,\" a unique SUV that blends utility with true muscle-car performance.", "modelName": "Dodge Durango", "years": "Full-Size SUV | 1998-Present" },
+              { "brand": "Dodge", "category": "past", "description": "A celebrated modern revival of the classic pony car, culminating in models like the Hellcat and Demon.", "modelName": "Dodge Challenger", "years": "Muscle Car | 2008-2023" },
+              { "brand": "Dodge", "category": "past", "description": "An uncompromising, raw American supercar powered by a massive V10 engine. A true legend.", "modelName": "Dodge Viper", "years": "Sports Car | 1992-2017" },
+              { "brand": "Dodge", "category": "past", "description": "A compact sedan based on an Alfa Romeo platform, offering distinctive style and options.", "modelName": "Dodge Dart", "years": "Compact Sedan | 2013-2016" },
+              { "brand": "Dodge", "category": "past", "description": "A popular and affordable crossover, often equipped with three rows of seating.", "modelName": "Dodge Journey", "years": "Mid-Size Crossover | 2009-2020" },
+              { "brand": "Dodge", "category": "past", "description": "The 5-door hatchback that replaced the Neon, including a high-performance SRT-4 version.", "modelName": "Dodge Caliber", "years": "Compact Hatchback | 2007-2012" },
+              { "brand": "Dodge", "category": "past", "description": "An aggressively styled SUV based on the Jeep Liberty platform.", "modelName": "Dodge Nitro", "years": "Compact SUV | 2007-2012" },
+              { "brand": "Dodge", "category": "past", "description": "A bold, rear-wheel-drive muscle wagon with Charger-inspired styling and available HEMI power.", "modelName": "Dodge Magnum", "years": "Station Wagon | 2005-2008" },
+              { "brand": "Dodge", "category": "past", "description": "The minivan that started it all, offering unparalleled value and practicality for families for over 35 years.", "modelName": "Dodge Grand Caravan", "years": "Minivan | 1984-2020" },
+              { "brand": "Dodge", "category": "past", "description": "A unique mid-size truck that stood out by offering an available V8 engine.", "modelName": "Dodge Dakota", "years": "Mid-Size Pickup | 1987-2011" },
+              { "brand": "Dodge", "category": "past", "description": "The classic, long-running full-size van that was a staple for work and travel.", "modelName": "Dodge Ram Van / Wagon", "years": "Full-Size Van | to 2003" },
+              { "brand": "Dodge", "category": "past", "description": "The classic two-door SUV based on the Ram pickup, a competitor to the Ford Bronco.", "modelName": "Dodge Ramcharger", "years": "Full-Size SUV | to 1993" },
+              { "brand": "Dodge", "category": "past", "description": "The Dodge flagship of the \"cab-forward\" era, offering a huge interior and sleek styling.", "modelName": "Dodge Intrepid", "years": "Full-Size Sedan | 1993-2004" },
+              { "brand": "Dodge", "category": "past", "description": "Dodge's \"cloud car\" counterpart to the Chrysler Cirrus, a popular family sedan.", "modelName": "Dodge Stratus", "years": "Mid-Size Sedan | 1995-2006" },
+              { "brand": "Dodge", "category": "past", "description": "A fun-to-drive and affordable compact car, famous for its \"Hi\" marketing and SRT-4 variant.", "modelName": "Dodge Neon", "years": "Compact Car | 1995-2005" },
+              { "brand": "Dodge", "category": "past", "description": "A rebadged Mitsubishi 3000GT, this was a high-tech, AWD sports car that was ahead of its time.", "modelName": "Dodge Stealth", "years": "Sports Car | 1991-1996" },
+              { "brand": "Ram", "category": "current", "description": "A leader in the truck segment, praised for its benchmark interiors and comfortable ride.", "modelName": "Ram 1500", "years": "Full-Size Pickup | 2010-Present" },
+              { "brand": "Ram", "category": "current", "description": "Ram's two-pronged approach to electrification: the all-electric REV and the innovative Ramcharger range-extended EV.", "modelName": "Ram 1500 REV / Ramcharger", "years": "Electric Pickup | 2025 (Expected)" },
+              { "brand": "Ram", "category": "current", "description": "The workhorses of the lineup, built for extreme towing with the available Cummins diesel engine.", "modelName": "Ram 2500/3500 Heavy Duty", "years": "Heavy Duty Pickup | 2010-Present" },
+              { "brand": "Ram", "category": "current", "description": "A highly capable and versatile front-wheel-drive commercial van based on the Fiat Ducato.", "modelName": "Ram ProMaster", "years": "Full-Size Van | 2014-Present" },
+              { "brand": "Ram", "category": "past", "description": "The truck line before Ram became a standalone brand. The 2nd Gen (1994-2001) revolutionized truck design.", "modelName": "Dodge Ram (Pre-2010)", "years": "Full-Size Pickup | 1981-2009" },
+              { "brand": "Ram", "category": "past", "description": "A smaller, more maneuverable work van designed for urban environments, based on the Fiat Doblò.", "modelName": "Ram ProMaster City", "years": "Compact Van | 2015-2022" },
+              { "brand": "Plymouth", "category": "past", "description": "The original branding for the retro-styled factory hot rod before it became a Chrysler.", "modelName": "Plymouth Prowler", "years": "Sports Car | 1997-2001" },
+              { "brand": "Plymouth", "category": "past", "description": "The Plymouth version of the popular and fun-to-drive compact sedan and coupe.", "modelName": "Plymouth Neon", "years": "Compact Car | 1995-2001" },
+              { "brand": "Plymouth", "category": "past", "description": "The Plymouth version of the groundbreaking minivan that created a segment.", "modelName": "Plymouth Voyager / Grand Voyager", "years": "Minivan | to 2000" },
+              { "brand": "Plymouth", "category": "past", "description": "The Plymouth \"cloud car\" sibling to the Chrysler Cirrus and Dodge Stratus.", "modelName": "Plymouth Breeze", "years": "Mid-Size Sedan | 1996-2000" },
+              { "brand": "Plymouth", "category": "past", "description": "A reliable and popular sedan from the K-car platform lineage.", "modelName": "Plymouth Acclaim", "years": "Mid-Size Sedan | to 1995" },
+              { "brand": "Plymouth", "category": "past", "description": "A sibling to the Mitsubishi Eclipse and Eagle Talon, part of the Diamond-Star Motors venture.", "modelName": "Plymouth Laser", "years": "Sports Coupe | to 1994" },
+              { "brand": "Eagle", "category": "past", "description": "A popular sports coupe from the Diamond-Star Motors venture, known for its available turbo and AWD.", "modelName": "Eagle Talon", "years": "Sports Coupe | to 1998" },
+              { "brand": "Eagle", "category": "past", "description": "The Eagle version of the innovative \"cab-forward\" sedans, marketed as a sportier alternative.", "modelName": "Eagle Vision", "years": "Full-Size Sedan | 1993-1997" }
+            ];
+
+            const publicPath = `artifacts/${window.appId}/public/data`;
+            const catalogRef = collection(window.db, `${publicPath}/cdjr_catalog`);
+
+            console.log("Checking for existing data...");
+            const existingDocs = await getDocs(query(catalogRef));
+            if (!existingDocs.empty) {
+                console.warn("Data already exists in the 'cdjr_catalog' collection. Aborting import to prevent duplicates.");
+                alert("The CDJR Catalog data has already been imported. You don't need to run this script again.");
+                return;
+            }
+
+            console.log(`Starting import of ${vehicleData.length} vehicles...`);
+            
+            const batch = writeBatch(window.db);
+            
+            vehicleData.forEach(vehicle => {
+                const newDocRef = doc(catalogRef);
+                batch.set(newDocRef, vehicle);
+            });
+
+            try {
+                await batch.commit();
+                console.log("✅ Success! All vehicle documents have been added to Firestore.");
+                alert("✅ Success! All vehicle documents have been added to Firestore. Please refresh the application to see the catalog.");
+            } catch (error) {
+                console.error("❌ Error writing batch to Firestore:", error);
+                alert("❌ An error occurred during the import. Check the console for details.");
+            }
+        }
+        window.runCdjrImport = batchImportCdjrData;
 
         // --- CUSTOM COMBOBOX/SELECT SCRIPT (REFACTORED & FIXED) ---
 
@@ -1244,8 +1334,8 @@
             // --- CDJR CATALOG FUNCTIONS ---
             async function loadCdjrCatalog() {
                 const pageContainer = document.getElementById('cdjrCatalogPage');
-                if (cdjrVehicles.length > 0) {
-                    // Data already fetched, no need to reload
+                if (pageContainer.querySelector('.catalog-container')) {
+                    // Already rendered
                     return;
                 }
 
@@ -1254,7 +1344,7 @@
                 try {
                     const snapshot = await getDocs(cdjrCatalogRef);
                     if (snapshot.empty) {
-                        pageContainer.innerHTML = `<div class="editor-placeholder"><p>No vehicle data found in the database.</p><p>Please follow the instructions to add the catalog data to Firestore.</p></div>`;
+                        pageContainer.innerHTML = `<div class="editor-placeholder"><p>No vehicle data found in the database.</p><p>Run the import script from the console to populate the catalog.</p></div>`;
                         return;
                     }
                     cdjrVehicles = snapshot.docs.map(doc => doc.data());
@@ -1267,16 +1357,15 @@
             }
 
             function renderCatalogContent(container, vehicles) {
-                const brands = [...new Set(vehicles.map(v => v.brand))];
-                const brandColors = { Chrysler: '#00aaff', Jeep: '#22c55e', Dodge: '#ef4444', Ram: '#facc15', Plymouth: '#22d3ee', Eagle: '#9ca3af' };
-
+                const brands = [...new Set(vehicles.map(v => v.brand))].sort();
+                
                 let tabsHTML = brands.map((brand, index) => 
                     `<button data-tab="${brand}" class="catalog-tab-button ${index === 0 ? 'tab-active' : ''}">${brand}</button>`
                 ).join('');
 
                 let contentHTML = brands.map((brand, index) => {
-                    const currentModels = vehicles.filter(v => v.brand === brand && v.category === 'current');
-                    const pastModels = vehicles.filter(v => v.brand === brand && v.category === 'past');
+                    const currentModels = vehicles.filter(v => v.brand === brand && v.category === 'current').sort((a,b) => a.modelName.localeCompare(b.modelName));
+                    const pastModels = vehicles.filter(v => v.brand === brand && v.category === 'past').sort((a,b) => a.modelName.localeCompare(b.modelName));
                     
                     const createSectionHTML = (title, models) => {
                         if (models.length === 0) return '';
@@ -1431,9 +1520,9 @@
                     await addDoc(cdjrCatalogRef, newVehicle);
                     showToast("Vehicle added successfully!");
                     hideAddVehicleModal();
-                    // Refresh data
-                    cdjrVehicles.push(newVehicle);
-                    renderCatalogContent(document.getElementById('cdjrCatalogPage'), cdjrVehicles);
+                    // Refresh data by re-fetching
+                    cdjrVehicles = []; // Clear local cache
+                    loadCdjrCatalog();
                 } catch (error) {
                     console.error("Error adding vehicle:", error);
                     showToast("Failed to add vehicle.", true);
