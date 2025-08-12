@@ -637,8 +637,8 @@
               { "brand": "Eagle", "category": "past", "description": "The Eagle version of the innovative \"cab-forward\" sedans, marketed as a sportier alternative.", "modelName": "Eagle Vision", "years": "Full-Size Sedan | 1993-1997" }
             ];
 
-            const publicPath = `artifacts/${window.appId}/public/data`;
-            const catalogRef = collection(window.db, `${publicPath}/cdjr_catalog`);
+            const publicPath = `artifacts/${appId}/public/data`;
+            const catalogRef = collection(db, `${publicPath}/cdjr_catalog`);
 
             console.log("Checking for existing data...");
             const existingDocs = await getDocs(query(catalogRef));
@@ -650,7 +650,7 @@
 
             console.log(`Starting import of ${vehicleData.length} vehicles...`);
             
-            const batch = writeBatch(window.db);
+            const batch = writeBatch(db);
             
             vehicleData.forEach(vehicle => {
                 const newDocRef = doc(catalogRef);
