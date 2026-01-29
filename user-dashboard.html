@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduler Training Hub - Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+        @layer base {
+            :root {
+                --background: 0 0% 100%;
+                --foreground: 222.2 47.4% 11.2%;
+                --muted: 210 40% 96.1%;
+                --muted-foreground: 215.4 16.3% 46.9%;
+                --popover: 0 0% 100%;
+                --popover-foreground: 222.2 47.4% 11.2%;
+                --border: 214.3 31.8% 91.4%;
+                --input: 214.3 31.8% 91.4%;
+                --card: transparent;
+                --card-foreground: 222.2 47.4% 11.2%;
+                --primary: 222.2 47.4% 11.2%;
+                --primary-foreground: 210 40% 98%;
+                --secondary: 210 40% 96.1%;
+                --secondary-foreground: 222.2 47.4% 11.2%;
+                --accent: 210 40% 96.1%;
+                --accent-foreground: 222.2 47.4% 11.2%;
+                --destructive: 0 100% 50%;
+                --destructive-foreground: 210 40% 98%;
+                --ring: 215 20.2% 65.1%;
+                --radius: 0.5rem;
+            }
+            .dark {
+                --background: 224 71% 4%;
+                --foreground: 213 31% 91%;
+                --muted: 223 47% 11%;
+                --muted-foreground: 215.4 16.3% 56.9%;
+                --accent: 216 34% 17%;
+                --accent-foreground: 210 40% 98%;
+                --popover: 224 71% 4%;
+                --popover-foreground: 215 20.2% 65.1%;
+                --border: 216 34% 17%;
+                --input: 216 34% 17%;
+                --card: transparent;
+                --card-foreground: 213 31% 91%;
+                --primary: 210 40% 98%;
+                --primary-foreground: 222.2 47.4% 1.2%;
+                --secondary: 222.2 47.4% 11.2%;
+                --secondary-foreground: 210 40% 98%;
+                --destructive: 0 63% 31%;
+                --destructive-foreground: 210 40% 98%;
+                --ring: 216 34% 17%;
+            }
+        }
+
+        @layer base {
+            * { @apply border-border; }
+            body { @apply bg-background text-foreground; font-feature-settings: "rlig" 1, "calt" 1; }
+        }
+
+        .brand-gradient { background: linear-gradient(to right, rgba(80, 72, 229, 0.1), rgba(245, 159, 10, 0.1)); }
+        .help-gradient { background: linear-gradient(to right, rgb(80, 72, 229), rgb(245, 159, 10)); }
+
+        @layer components {
+            .module-card {
+                @apply bg-white dark:bg-zinc-900 rounded-xl overflow-hidden border border-neutral-100 dark:border-zinc-800 shadow-sm transition-all duration-500 relative cursor-pointer flex flex-col h-full min-h-[300px];
+            }
+
+            .module-card-header {
+                @apply p-6 flex items-center justify-center transition-all duration-500;
+                background: linear-gradient(135deg, #6366f1 0%, #f59e0b 100%);
+                background-size: 200% 200%;
+                opacity: 0.85;
+            }
+
+            .module-card:hover {
+                @apply border-indigo-400 dark:border-indigo-500;
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3), 
+                            0 10px 10px -5px rgba(245, 158, 11, 0.2);
+            }
+
+            .module-card:hover .module-card-header {
+                opacity: 1;
+                animation: gradient-shift 3s ease infinite;
+            }
+
+            @keyframes gradient-shift {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            darkMode: ["class"],
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: { DEFAULT: "#6366f1", foreground: "hsl(var(--primary-foreground))" },
+                        secondary: { DEFAULT: "#f59e0b", foreground: "hsl(var(--secondary-foreground))" },
+                        muted: { DEFAULT: "hsl(var(--muted))", foreground: "hsl(var(--muted-foreground))" },
+                        accent: { DEFAULT: "hsl(var(--accent))", foreground: "hsl(var(--accent-foreground))" },
+                    },
+                    borderRadius: { lg: "var(--radius)", md: "calc(var(--radius) - 2px)", sm: "calc(var(--radius) - 4px)" },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                },
+            },
+        }
+    </script>
+    <script>
+            (function () {
+                const savedTheme = localStorage.getItem('theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.classList.add('dark');
+                }
+            })();
+    </script>
+</head>
+
+<body class="font-inter flex flex-col min-h-screen">
+    <div id="header-container"></div>
+
+    <div id="splash-screen"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-zinc-950 transition-opacity duration-700">
+        <div class="flex flex-col items-center">
+            <div class="mb-4">
+                <span class="text-2xl font-bold">
+                    <span class="text-indigo-600">Scheduler</span><span class="text-amber-500">TrainingHub</span>
+                </span>
+            </div>
+            <div class="w-12 h-12 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p class="mt-4 text-sm font-medium text-zinc-500 dark:text-zinc-400 animate-pulse">
+                Loading your Dashboard...
+            </p>
+        </div>
+    </div>
+
+    <main class="grow">
+        <section class="relative overflow-hidden">
+            <div class="absolute inset-0 brand-gradient"></div>
+            <div class="relative max-w-[1600px] mx-auto px-6 py-16">
+                <h1 class="text-3xl md:text-4xl font-bold mb-4">Welcome back, <span id="user-first-name"></span>!</h1>
+                <p class="text-neutral-500 dark:text-zinc-400 text-lg">Continue your training journey and master
+                    scheduling tools.</p>
+            </div>
+        </section>
+
+        <section class="max-w-[1600px] mx-auto px-6 py-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div
+                    class="bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-6 rounded-xl shadow-sm flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral-500 dark:text-zinc-400 text-sm font-medium mb-6">Modules Available</p>
+                        <p id="available-modules-count" class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="bg-indigo-600/10 p-2 rounded-full text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+                            <path d="M8 7h6m-6 4h8" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-6 rounded-xl shadow-sm flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral-500 dark:text-zinc-400 text-sm font-medium mb-6">Completed</p>
+                        <p id="completed-count" class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="bg-indigo-600/10 p-2 rounded-full text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-6 rounded-xl shadow-sm flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral-500 dark:text-zinc-400 text-sm font-medium mb-6">In Progress</p>
+                        <p id="in-progress-count" class="text-3xl font-bold">0</p>
+                    </div>
+                    <div class="bg-indigo-600/10 p-2 rounded-full text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 20v-6M6 20V10m12 10V4" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 p-6 rounded-xl shadow-sm flex justify-between items-start">
+                    <div>
+                        <p class="text-neutral-500 dark:text-zinc-400 text-sm font-medium mb-6">Total Time</p>
+                        <p id="total-learning-time" class="text-3xl font-bold">0 mins</p>
+                    </div>
+                    <div class="bg-indigo-600/10 p-2 rounded-full text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 6v6l4 2" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 max-w-[1600px] mx-auto px-6">
+            <div class="mb-10">
+                <h2 class="text-3xl font-bold text-neutral-900 dark:text-zinc-100">Training Modules</h2>
+                <p class="text-neutral-500 dark:text-zinc-400 mt-2">Select a system to begin your interactive training
+                    session.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div id="module-xtime" class="module-card group"
+                    onclick="createRipple(event, this); setTimeout(() => location.href='xtime-module.html', 300)">
+                    <div class="module-card-header bg-neutral-100 dark:bg-neutral-800">
+                        <img src="./images/xtime logo.png" alt="Xtime"
+                            class="h-16 w-16 object-contain group-hover:scale-110 transition-transform duration-500">
+                    </div>
+                    <div class="p-6 flex flex-col grow">
+                        <div class="grow">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="text-xl font-bold group-hover:text-indigo-600 transition-colors">Xtime</h3>
+                                <div id="status-tag-xtime" class="inline-flex items-center"></div>
+                            </div>
+                            <p class="text-neutral-500 dark:text-zinc-400 text-sm leading-relaxed mb-6">
+                                Master the scheduler and learn the Appointment booking flow, Service Shop types and
+                                Transportation options.
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-between mt-auto">
+                            <span
+                                class="text-xs font-medium px-2 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 rounded-full">35
+                                min</span>
+                            <div class="flex items-center text-indigo-600 font-bold text-sm">
+                                <span id="btn-label-xtime">Start</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="module-card opacity-80 group grayscale hover:grayscale-0 transition-all duration-500">
+                    <div class="module-card-header bg-neutral-100 dark:bg-neutral-800">
+                        <img src="./images/CDK logo.png" alt="CDK" class="h-16 w-16 object-contain">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2 text-neutral-400">CDK</h3>
+                        <p class="text-neutral-500 dark:text-zinc-500 text-sm leading-relaxed mb-6"></p>
+                        <div class="flex items-center text-neutral-400 font-bold text-sm">Coming Soon</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="max-w-[1600px] mx-auto px-6 py-16">
+            <div class="help-gradient text-white text-center p-8 md:p-12 rounded-2xl shadow-lg">
+                <h2 class="text-2xl md:text-3xl font-bold mb-4">Need Help Getting Started?</h2>
+                <p class="text-white/90 max-w-xl mx-auto mb-6">Our learning paths guide you through each module step by
+                    step.</p>
+                <div class="flex justify-center items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24" class="opacity-90">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                    </svg>
+                    <span class="font-medium text-sm">Average completion: 2-3 hours for all modules</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script type="module">
+        import { auth, db } from "./components/firebase-init.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { loadDashboardStats } from "./components/user-dash-stats.js";
+        import { initializeTheme } from "./components/theme-manager.js";
+        import { initializeHeader } from "./components/header.js";
+        import { initializeFooter } from "./components/footer.js";
+        import { initializeLogout } from "./components/logout.js";
+
+        // Global UI Initializers
+        initializeHeader();
+        initializeFooter();
+        initializeTheme();
+        initializeLogout();
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (!userDoc.exists()) return;
+
+                    const userData = userDoc.data();
+                    const firstName = userData.firstName || "";
+                    const lastName = userData.lastName || "";
+                    const fullName = `${firstName} ${lastName}`;
+
+                    // Generate Initials
+                    const initials = ((firstName[0] || "") + (lastName[0] || "")).toUpperCase();
+
+                    // 1. Dashboard Greeting
+                    const nameEl = document.getElementById('user-first-name');
+                    if (nameEl) nameEl.innerText = firstName || "User";
+
+                    // 2. HEADER INITIALS FIX
+                    // We target the ID used in the header component for the circular avatar initials
+                    const headerInitials = document.getElementById('user-initials');
+                    if (headerInitials) headerInitials.innerText = initials;
+
+                    // 3. Header Dropdown Population
+                    const dropName = document.getElementById('dropdown-full-name');
+                    const dropEmail = document.getElementById('dropdown-email');
+                    if (dropName) dropName.innerText = fullName;
+                    if (dropEmail) dropEmail.innerText = user.email;
+
+                    // Load Module Data
+                    const modulesRef = collection(db, "modules");
+                    const modulesQuery = query(modulesRef, orderBy("module_id", "asc"));
+                    const allModulesSnapshot = await getDocs(modulesQuery);
+
+                    let activeCount = 0;
+                    let totalMins = 0;
+
+                    allModulesSnapshot.forEach((doc) => {
+                        const moduleData = doc.data();
+                        if (moduleData.status === "active") {
+                            activeCount++;
+                            totalMins += parseInt(moduleData.estimated_time) || 0;
+                        }
+                    });
+
+                    const availableEl = document.getElementById('available-modules-count');
+                    const timeEl = document.getElementById('total-learning-time');
+                    if (availableEl) availableEl.innerText = activeCount;
+                    if (timeEl) timeEl.innerText = `${totalMins} min`;
+
+                    // Load Dashboard Stats
+                    await loadDashboardStats(user.uid);
+
+                    // 1. Fetch User Progress using the path allowed by your rules
+                    // Rule 3 matches: /module_progress/{userId}/{document=**}
+                    const progressRef = collection(db, "module_progress", user.uid, "modules");
+                    const progressSnapshot = await getDocs(progressRef);
+                    const userProgress = {};
+
+                    progressSnapshot.forEach(doc => {
+                        // Map data by document ID (e.g., "Xtime")
+                        userProgress[doc.id] = doc.data();
+                    });
+
+                    // 2. Define the rendering function
+                    const renderStatus = (moduleId) => {
+                        const progressData = userProgress[moduleId];
+                        const tagContainer = document.getElementById(`status-tag-${moduleId.toLowerCase()}`);
+                        const labelBtn = document.getElementById(`btn-label-${moduleId.toLowerCase()}`);
+
+                        if (!progressData || !tagContainer) return;
+
+                        let tagHtml = "";
+                        let buttonText = "Start";
+
+                        // Use 'completion' to match your profile logic
+                        const isCompleted = progressData.completion === true || progressData.completion === "true";
+                        const currentProgress = parseFloat(progressData.progress) || 0;
+
+                        if (isCompleted) {
+                            tagHtml = `<span class="ml-2 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200">Completed</span>`;
+                            buttonText = "View";
+                        }
+                        else if (currentProgress > 0) {
+                            tagHtml = `<span class="ml-2 text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full border border-blue-200">In-Progress</span>`;
+                            buttonText = "Resume";
+                        }
+
+                        tagContainer.innerHTML = tagHtml;
+                        if (labelBtn) labelBtn.innerText = buttonText;
+                    };
+
+                    // 3. Apply to Xtime (Note: moduleId must match the document ID in Firebase)
+                    renderStatus("Xtime");
+                    // renderStatus("cdk"); // When CDK is implemented
+
+                    const splash = document.getElementById('splash-screen');
+                    if (splash) {
+                        splash.classList.add('opacity-0');
+                        setTimeout(() => { splash.style.display = 'none'; }, 700);
+                    }
+
+                } catch (error) {
+                    console.error("Dashboard Initialization Error:", error);
+                }
+            } else {
+                window.location.href = "sign.html";
+            }
+        });
+
+        // Visual ripple effect
+        window.createRipple = function (event, element) {
+            const rect = element.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-effect';
+            ripple.style.left = `${x}px`;
+            ripple.style.top = `${y}px`;
+            element.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 1000);
+        };
+    </script>
+</body>
+
+</html>

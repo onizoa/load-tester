@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth | Scheduler Training Hub</title>
+  <link rel="icon" type="image/png" href="./images/STH icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            secondary: '#f59e0b',
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .hidden-view {
+      display: none;
+    }
+
+    .bg-mesh {
+      background-color: #f8fafc;
+      background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+    }
+
+    .ripple {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ripple-inner {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0);
+      animation: ripple-animation 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-mesh flex flex-col min-h-screen">
+
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <a href="index.html" class="text-2xl font-bold flex items-center">
+        <span class="text-primary">Scheduler</span><span class="text-secondary">TrainingHub</span>
+      </a>
+    </div>
+  </nav>
+  <div class="text-center max-w-2xl mx-auto mb-40"></div>
+  <main class="flex-grow flex items-center justify-center py-16 px-4 mt-10">
+    <div class="max-w-md w-full">
+
+      <div id="login-view" class="bg-white p-10 rounded-2xl shadow-xl border border-gray-100 animate-fade-in">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-extrabold text-gray-900">Welcome Back</h2>
+          <p class="mt-2 text-sm text-gray-600">
+            New here? <button onclick="toggleAuth('signup')"
+              class="font-semibold text-primary hover:underline">Register</button>
+          </p>
+        </div>
+        <form class="space-y-5" onsubmit="handleLogin(event)">
+          <div class="space-y-4">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-feather="mail"
+                  class="h-5 w-5 text-gray-400"></i></div>
+              <input type="email" id="loginEmail" required
+                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="Email address">
+            </div>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-feather="lock"
+                  class="h-5 w-5 text-gray-400"></i></div>
+              <input type="password" id="loginPass" required
+                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="Password">
+            </div>
+          </div>
+          <button type="submit"
+            class="ripple w-full py-3 px-4 text-sm font-bold rounded-xl text-white bg-primary shadow-lg shadow-primary/30 active:scale-[0.98]">Sign
+            in</button>
+        </form>
+      </div>
+
+      <div id="signup-view"
+        class="bg-white p-10 rounded-2xl shadow-xl border border-gray-100 animate-fade-in hidden-view">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-extrabold text-gray-900">Create Account</h2>
+          <p class="mt-2 text-sm text-gray-600">Already have an account? <button onclick="toggleAuth('login')"
+              class="font-semibold text-primary hover:underline">Sign in</button></p>
+        </div>
+
+        <div id="reg-error"
+          class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded text-red-700 text-sm flex items-center">
+          <i data-feather="alert-circle" class="w-4 h-4 mr-2"></i>
+          <span id="reg-error-msg"></span>
+        </div>
+
+        <form id="signup-form" class="space-y-4" onsubmit="handleRegistration(event)">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-feather="user"
+                  class="h-5 w-5 text-gray-400"></i></div>
+              <input type="text" id="firstName" required onblur="applyTitleCase(this)"
+                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none"
+                placeholder="First Name">
+            </div>
+            <div class="relative">
+              <input type="text" id="lastName" required onblur="applyTitleCase(this)"
+                class="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none"
+                placeholder="Last Name">
+            </div>
+          </div>
+
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-feather="mail"
+                class="h-5 w-5 text-gray-400"></i></div>
+            <input type="email" id="regEmail" required
+              class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none"
+              placeholder="Email address">
+          </div>
+
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-feather="lock"
+                class="h-5 w-5 text-gray-400"></i></div>
+            <input type="password" id="regPass" required
+              class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none"
+              placeholder="Password">
+          </div>
+
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><i data-feather="shield"
+                class="h-5 w-5 text-gray-400"></i></div>
+            <input type="password" id="regConfirm" required
+              class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none"
+              placeholder="Confirm Password">
+          </div>
+
+          <button type="submit"
+            class="ripple w-full py-3 px-4 text-sm font-bold rounded-xl text-white bg-primary shadow-lg active:scale-[0.98]">Create
+            Account</button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+  <div class="text-center max-w-2xl mx-auto mb-60"></div>
+  <div id="footer-container"></div>
+
+  <script type="module">
+    import { initializeFooter } from "./components/main-footer.js";
+    initializeFooter();
+  </script>
+  <script type="module" src="./components/auth.js"></script>
+
+  <script>
+    feather.replace();
+
+    /** Rule 1: Auto-capitalize first letter, lowercase the rest **/
+    function applyTitleCase(input) {
+      if (!input.value) return;
+      input.value = input.value
+        .trim()
+        .toLowerCase()
+        .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    function toggleAuth(view) {
+      document.getElementById('login-view').classList.add('hidden-view');
+      document.getElementById('signup-view').classList.add('hidden-view');
+      document.getElementById(view + '-view').classList.remove('hidden-view');
+      feather.replace();
+    }
+
+    // Visual Ripple Effect
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest('.ripple');
+      if (btn) {
+        const ripple = document.createElement('span');
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = `${size}px`;
+        ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+        ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+        ripple.classList.add('ripple-inner');
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+      }
+    });
+  </script>
+</body>
+
+</html>

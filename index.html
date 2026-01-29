@@ -1,1689 +1,277 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hot Alerts - Tool Suite</title>
-    <link rel="icon" type="image/png" href="https://placehold.co/32x32/55acee/ffffff?text=HA">
+    <title>Scheduler Synapse Sparkles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        :root {
-            --font-family-sans: 'Inter', sans-serif;
-            --transition-speed: 0.3s;
-            --animation-speed: 0.4s;
-
-            /* Dark Theme */
-            --background-dark: #111111;
-            --surface-dark: #1c1c1c;
-            --surface-light-dark: #2a2a2a;
-            --on-surface-dark: #e0e0e0;
-            --on-surface-variant-dark: #8c8c8c;
-            --primary-dark: #00aaff;
-            --primary-variant-dark: #0088cc;
-            --border-dark: #333333;
-            --thumb-dark: #4a4a4a;
-            --shadow-dark: rgba(0, 0, 0, 0.3);
-            --error-dark: #ff5252;
-            --warning-dark: #2e2020;
-            --warning-text-dark: #ff8f8f;
-            --modal-backdrop-dark: rgba(0, 0, 0, 0.6);
-
-            /* Light Theme */
-            --background-light: #f5f7fa;
-            --surface-light: #ffffff;
-            --surface-light-light: #f0f2f5;
-            --on-surface-light: #111111;
-            --on-surface-variant-light: #6c757d;
-            --primary-light: #007bff;
-            --primary-variant-light: #0056b3;
-            --border-light: #e0e0e0;
-            --thumb-light: #c1c1c1;
-            --shadow-light: rgba(0, 0, 0, 0.1);
-            --error-light: #dc3545;
-            --warning-light: #ffe0e0;
-            --warning-text-light: #aa0000;
-            --modal-backdrop-light: rgba(200, 200, 200, 0.6);
-
-            /* Default to Dark Theme */
-            --c-background: var(--background-dark);
-            --c-surface: var(--surface-dark);
-            --c-surface-light: var(--surface-light-dark);
-            --c-on-surface: var(--on-surface-dark);
-            --c-on-surface-variant: var(--on-surface-variant-dark);
-            --c-primary: var(--primary-dark);
-            --c-primary-variant: var(--primary-variant-dark);
-            --c-border: var(--border-dark);
-            --c-thumb: var(--thumb-dark);
-            --c-shadow: var(--shadow-dark);
-            --c-error: var(--error-dark);
-            --c-warning: var(--warning-dark);
-            --c-warning-text: var(--warning-text-dark);
-            --c-modal-backdrop: var(--modal-backdrop-dark);
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
         }
 
-        body.light-mode {
-            --c-background: var(--background-light);
-            --c-surface: var(--surface-light);
-            --c-surface-light: var(--surface-light-light);
-            --c-on-surface: var(--on-surface-light);
-            --c-on-surface-variant: var(--on-surface-variant-light);
-            --c-primary: var(--primary-light);
-            --c-primary-variant: var(--primary-variant-light);
-            --c-border: var(--border-light);
-            --c-thumb: var(--thumb-light);
-            --c-shadow: var(--shadow-light);
-            --c-error: var(--error-light);
-            --c-warning: var(--warning-light);
-            --c-warning-text: var(--warning-text-light);
-            --c-modal-backdrop: var(--modal-backdrop-light);
+        .bg-gradient-mesh {
+            background: linear-gradient(135deg, #f3f0ff 0%, #fff 50%, #fff7ed 100%);
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
-        
-        body { margin: 0; font-family: var(--font-family-sans); background-color: var(--c-background); color: var(--c-on-surface); display: flex; height: 100vh; overflow: hidden; transition: background-color var(--transition-speed), color var(--transition-speed); cursor: default; user-select: none; -webkit-user-select: none; }
-        input, textarea, .template-preview, .template-preview * { user-select: text; -webkit-user-select: text; cursor: text; }
-        select, button { cursor: pointer; }
-
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background-color: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: var(--c-thumb); border-radius: 4px; border: 2px solid var(--c-surface); }
-        ::-webkit-scrollbar-thumb:hover { background-color: var(--c-primary-variant); }
-        .sidebar-content, .card-container, .settings-container, #manageTemplatesContainer, #cdjrCatalogPage { scrollbar-width: thin; scrollbar-color: var(--c-thumb) var(--c-surface); }
-
-        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--c-background); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s, visibility 0.5s; }
-        #splashScreen.hidden { opacity: 0; visibility: hidden; }
-        #splashScreen p { margin-top: 20px; font-size: 16px; color: var(--c-on-surface-variant); }
-
-        #authContainer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .auth-form-container { width: 100%; max-width: 400px; padding: 40px; background-color: var(--c-surface); border-radius: 12px; border: 1px solid var(--c-border); }
-        .auth-form-container h2 { text-align: center; color: var(--c-primary); margin-top: 0; margin-bottom: 24px; }
-        .auth-form-container .input-group { margin-bottom: 16px; }
-        .auth-form-container .btn { margin-top: 8px; }
-        .auth-toggle-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--c-on-surface-variant); }
-        .auth-toggle-link button { background: none; border: none; color: var(--c-primary); font-weight: 600; padding: 0; }
-        .auth-toggle-link button:hover { text-decoration: underline; }
-
-        #appContainer { display: flex; flex-direction: column; width: 100%; height: 100%; }
-
-        .sidebar { width: 320px; flex-shrink: 0; background-color: var(--c-surface); border-right: 1px solid var(--c-border); display: flex; flex-direction: column; padding: 24px; transition: margin-left var(--animation-speed), background-color var(--transition-speed), border-color var(--transition-speed); }
-        
-        .logo-icon { width: 40px; height: 40px; flex-shrink: 0; }
-        .sidebar-content { flex-grow: 1; overflow-y: auto; padding: 8px 4px 8px 0; }
-
-        .input-group { margin-bottom: 8px; }
-
-        /* === MODERN COMBOBOX STYLES START === */
-        .select-wrapper { 
-            position: relative; 
-            width: 100%; 
+        .text-gradient {
+            background: linear-gradient(to right, #6366f1, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .select-field { 
-            display: none; 
-        }
-        .custom-select-wrapper { 
-            position: relative; 
-            width: 100%; 
-            color: var(--c-on-surface); 
-        }
-        .select-selected { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background-color: var(--c-background); 
-            padding: 12px 16px; 
-            border: 1px solid var(--c-border); 
-            border-radius: 8px; /* Modern rounded corners */
-            cursor: pointer; 
-            transition: border-color 0.3s, box-shadow 0.3s; 
-            user-select: none; 
-        }
-        .select-selected:hover {
-            border-color: color-mix(in srgb, var(--c-primary) 50%, var(--c-border));
-        }
-        .select-selected.select-arrow-active { 
-            border-color: var(--c-primary); 
-            box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 20%, transparent); 
-            border-bottom-left-radius: 0; /* Flatten bottom corners when open */
-            border-bottom-right-radius: 0; 
-        }
-        .select-selected::after { 
-            content: "▼"; /* Using a character for the arrow */
-            font-size: 12px;
-            color: var(--c-on-surface-variant);
-            transition: all 0.3s; 
-        }
-        .select-selected.select-arrow-active::after { 
-            transform: rotate(180deg); 
-        }
-        .select-items { 
-            position: absolute; 
-            background-color: var(--c-surface); 
-            top: 100%; 
-            left: 0; 
-            right: 0; 
-            z-index: 99; 
-            border: 1px solid var(--c-primary); 
-            border-top: none; 
-            border-radius: 0 0 8px 8px; /* Rounded bottom corners for the listbox */
-            box-shadow: 0 8px 16px var(--c-shadow); 
-            overflow-y: auto; 
-            max-height: 200px; 
-        }
-        .select-hide { 
-            display: none; 
-        }
-        .select-items div { 
-            padding: 12px 16px; 
-            cursor: pointer; 
-            transition: background-color 0.2s; 
-        }
-        .select-items div:not(.optgroup):hover { 
-            background-color: var(--c-surface-light); 
-        }
-        .same-as-selected { 
-            background-color: color-mix(in srgb, var(--c-primary) 80%, #fff) !important;
-            color: #fff !important;
-            font-weight: 500;
-        }
-        .optgroup { 
-            font-weight: bold; 
-            color: var(--c-on-surface-variant); 
-            padding-bottom: 8px; 
-            margin-top: 8px; 
-            border-bottom: 1px solid var(--c-border); 
-            cursor: default !important;
-        }
-        /* === MODERN COMBOBOX STYLES END === */
 
-        .input-field, textarea { width: 100%; padding: 12px 16px; background-color: var(--c-background); border: 1px solid var(--c-border); border-radius: 8px; color: var(--c-on-surface); font-family: var(--font-family-sans); font-size: 14px; outline: none; transition: border-color var(--transition-speed), box-shadow var(--transition-speed); }
-        .input-field::placeholder, textarea::placeholder { color: var(--c-on-surface-variant); }
-        .input-field:focus, textarea:focus { border-color: var(--c-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 20%, transparent); }
-        .input-field.missing, .select-selected.missing { border-color: var(--c-error) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-error) 20%, transparent) !important; animation: shake 0.3s; }
-        
-        .sidebar-footer { padding-top: 16px; border-top: 1px solid var(--c-border); }
-        .btn { padding: 12px 24px; border-radius: 8px; font-weight: 600; border: none; transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background-color: var(--c-primary); color: #fff; }
-        .btn-primary:hover { background-color: var(--c-primary-variant); }
-        .btn-secondary { background-color: var(--c-surface-light); color: var(--c-on-surface); border: 1px solid var(--c-border); }
-        .btn-secondary:hover { background-color: var(--c-border); }
-        #clearAllBtn:hover { background-color: var(--c-primary-variant); color: #fff; border-color: var(--c-primary-variant); }
-        .btn-danger { background-color: transparent; color: var(--c-error); border: 1px solid var(--c-error); margin-right: auto; }
-        .btn-danger:hover { background-color: var(--c-warning); color: var(--c-warning-text); }
-        .btn-full-width { width: 100%; }
-        
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid var(--c-border); background-color: var(--c-surface); flex-shrink: 0; gap: 20px;}
-        #headerLeft { display: flex; align-items: center; gap: 40px; flex-grow: 1; }
-        .header-title { font-size: 24px; font-weight: 700; color: var(--c-on-surface); display: flex; align-items: center; gap: 12px; }
-        .header-title .logo-icon { width: 40px; height: 40px; }
-        .header-title .header-page-icon { width: 28px; height: 28px; stroke: var(--c-on-surface); }
-        .header-controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-        .search-container { position: relative; width: 100%; max-width: 500px; transition: opacity var(--animation-speed), visibility var(--animation-speed); }
-        .search-input { width: 100%; padding: 12px 40px 12px 48px; border-radius: 20px; border: 1px solid var(--c-border); background-color: var(--c-background); color: var(--c-on-surface); font-size: 14px; outline: none; }
-        .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; stroke: var(--c-on-surface); opacity: 0.5; z-index: 1; }
-        #clearSearchBtn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 60px; height: 30px; background-color: var(--c-surface); border-radius: 9999px; border: 1px solid var(--c-border); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; transition: background-color var(--transition-speed); }
-        #clearSearchBtn svg { stroke: var(--c-primary-variant); transition: stroke var(--transition-speed); }
-        #clearSearchBtn:hover { background-color: var(--c-primary-variant); }
-        #clearSearchBtn:hover svg { stroke: #fff; }
-        .header-btn { cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background-color: var(--c-surface); border: 1px solid var(--c-border); position: relative; transition: background-color var(--transition-speed); }
-        .header-btn:hover { background-color: var(--c-primary-variant); }
-        .header-icon { transition: transform var(--animation-speed) ease, opacity calc(var(--animation-speed) / 2) ease, stroke var(--transition-speed), fill var(--transition-speed); position: absolute; stroke: var(--c-primary-variant); fill: none; }
-        .header-btn:hover .header-icon { stroke: #fff; fill: #fff; }
-        .header-icon.moon { fill: var(--c-primary-variant); stroke: none; }
-        #themeToggle.spin .header-icon { transform: rotate(360deg); }
-        body:not(.light-mode) .header-icon.sun { display: none; }
-        body.light-mode .header-icon.moon { display: none; }
-        
-        .page-content { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; visibility: hidden; transform: translateY(15px); transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s 0.4s; display: flex; }
-        .page-content.active { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s 0s; }
-
-        #hotAlertsPage { flex-grow: 1; min-height: 0; }
-        .card-container { flex-grow: 1; padding: 40px; overflow-y: auto; }
-        .card-container.loading { display: flex; align-items: center; justify-content: center; }
-        .card { background-color: var(--c-surface); border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--c-border); overflow: hidden; transition: box-shadow 0.3s, opacity 0.3s, transform 0.3s; width: 100%; }
-        .card:hover { box-shadow: 0 8px 30px var(--c-shadow); }
-        .card-header { padding: 20px 24px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .card-title { font-size: 18px; font-weight: 600; color: var(--c-primary); }
-        .card-toggle-icon { width: 24px; height: 24px; transition: transform 0.3s; }
-        .card.expanded .card-toggle-icon { transform: rotate(45deg); }
-        .card-body { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; padding: 0 24px; }
-        .card.expanded .card-body { max-height: 1000px; padding: 0 24px 24px; }
-        .in-card-controls { margin-bottom: 16px; }
-        .template-preview { background-color: var(--c-background); border: 1px solid var(--c-border); border-radius: 8px; padding: 20px; font-size: 15px; line-height: 1.7; white-space: pre-wrap; word-wrap: break-word; }
-        .template-preview .filled { font-weight: 600; color: var(--c-on-surface); }
-        .template-preview .empty { color: var(--c-error); font-weight: 500; }
-        .warning-message { margin-top: 16px; padding: 12px; background-color: var(--c-warning); color: var(--c-warning-text); border-radius: 8px; font-size: 14px; display: none; }
-        .copy-btn { margin-top: 16px; }
-
-        #manageTemplatesPage { flex-direction: column; flex-grow: 1; padding: 40px; overflow-y: auto; }
-        .settings-wrapper { width: 100%; max-width: 1050px; margin: 0 auto; display: flex; flex-direction: column; flex-grow: 1; }
-        .settings-wrapper p { font-size: 15px; color: var(--c-on-surface-variant); margin: 0 0 24px 0; flex-shrink: 0; }
-        
-        #manageTemplatesContainer { background-color: var(--c-surface); border: 1px solid var(--c-border); border-radius: 12px; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; min-height: 200px; height: auto; transition: min-height var(--animation-speed) ease; }
-        
-        .template-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; border-bottom: 1px solid var(--c-border); padding-bottom: 24px; margin-bottom: 24px; flex-shrink: 0; }
-        .template-controls .select-wrapper { flex-grow: 1; }
-        #addNewTemplateBtn { flex-shrink: 0; }
-        
-        #templateEditor { display: flex; flex-direction: column; flex-grow: 1; }
-        .editor-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: var(--c-on-surface-variant); flex-grow: 1; min-height: 300px; }
-        .editor-placeholder svg { width: 64px; height: 64px; margin-bottom: 16px; opacity: 0.5; }
-        
-        .setting-item { margin-bottom: 20px; }
-        .setting-item.template-body-item { flex-grow: 1; display: flex; flex-direction: column; }
-        .setting-item label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; }
-        .template-body-textarea { min-height: 200px; height: 30vh; resize: vertical; flex-grow: 1; }
-        
-        #availableFields { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; padding: 10px; border-radius: 8px; background-color: var(--c-background); }
-        .field-tag { background-color: var(--c-surface); border: 1px solid var(--c-border); padding: 4px 10px; border-radius: 16px; font-size: 12px; transition: background-color var(--transition-speed), color var(--transition-speed); }
-        .field-tag:hover { background-color: var(--c-primary-variant); color: #fff; }
-
-        .required-fields-indicator { margin-top: 16px; font-size: 13px; color: var(--c-on-surface-variant); }
-        .required-fields-indicator strong { font-weight: 600; color: var(--c-on-surface); }
-        .required-fields-indicator span { background-color: var(--c-background); border: 1px solid var(--c-border); padding: 3px 8px; border-radius: 4px; margin: 0 4px; font-family: monospace; color: var(--c-on-surface); }
-
-        .editor-actions { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--c-border); display: flex; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
-        
-        /* Tool Suite Styles */
-        #toolSuitePage { flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; padding: 40px; }
-        .tool-suite-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; width: 100%; max-width: 1000px; }
-        .tool-card { background-color: var(--c-surface); border-radius: 16px; border: 1px solid var(--c-border); padding: 32px; text-align: center; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; }
-        .tool-card:hover { transform: translateY(-8px); box-shadow: 0 12px 40px var(--c-shadow); }
-        .tool-card-icon { width: 64px; height: 64px; margin-bottom: 20px; color: var(--c-primary); }
-        .tool-card h3 { font-size: 22px; font-weight: 700; margin: 0 0 12px 0; color: var(--c-on-surface); }
-        .tool-card p { font-size: 15px; color: var(--c-on-surface-variant); line-height: 1.6; margin: 0; }
-
-        /* CDJR Catalog Page Styles */
-        #cdjrCatalogPage {
-            flex-direction: column;
-            padding: 40px;
-            overflow-y: auto;
+        .btn-gradient {
+            background: linear-gradient(to right, #6366f1, #4f46e5);
+            transition: all 0.3s ease;
         }
-        .catalog-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
         }
-        .catalog-header { text-align: center; margin-bottom: 32px; position: relative; }
-        .catalog-header h1 { font-size: 28px; font-weight: 700; }
-        .catalog-header p { color: var(--c-on-surface-variant); margin-top: 8px; }
-        #addVehicleBtn { position: absolute; top: 0; right: 0; }
 
-        .catalog-search-container { margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .full-width-gradient {
+            background: linear-gradient(to right, #6366f1, #f59e0b);
+            position: relative;
+            overflow: hidden;
+        }
 
-        .catalog-tabs { display: flex; flex-wrap: wrap; justify-content: center; border-bottom: 1px solid var(--c-border); margin-bottom: 32px; }
-        .catalog-tab-button { padding: 12px 24px; font-weight: 600; border: none; background: none; color: var(--c-on-surface-variant); border-bottom: 3px solid transparent; transition: color 0.3s, border-color 0.3s; }
-        .catalog-tab-button.tab-active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
-        
-        .catalog-view-section { margin-bottom: 40px; }
-        .catalog-section-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 24px; }
-        .catalog-section-header h2 { font-size: 22px; font-weight: 600; }
-        /* Brand-specific header colors */
-        [data-brand-color="Chrysler"] .catalog-section-header { border-bottom: 2px solid #00aaff; } [data-brand-color="Chrysler"] .catalog-section-header h2 { color: #00aaff; }
-        [data-brand-color="Jeep"] .catalog-section-header { border-bottom: 2px solid #22c55e; } [data-brand-color="Jeep"] .catalog-section-header h2 { color: #22c55e; }
-        [data-brand-color="Dodge"] .catalog-section-header { border-bottom: 2px solid #ef4444; } [data-brand-color="Dodge"] .catalog-section-header h2 { color: #ef4444; }
-        [data-brand-color="Ram"] .catalog-section-header { border-bottom: 2px solid #facc15; } [data-brand-color="Ram"] .catalog-section-header h2 { color: #facc15; }
-        [data-brand-color="Plymouth"] .catalog-section-header { border-bottom: 2px solid #22d3ee; } [data-brand-color="Plymouth"] .catalog-section-header h2 { color: #22d3ee; }
-        [data-brand-color="Eagle"] .catalog-section-header { border-bottom: 2px solid #9ca3af; } [data-brand-color="Eagle"] .catalog-section-header h2 { color: #9ca3af; }
-        
-        .catalog-view-switcher { display: flex; gap: 8px; }
-        .catalog-view-btn { background-color: var(--c-surface-light); border: 1px solid var(--c-border); color: var(--c-on-surface-variant); padding: 8px; border-radius: 6px; }
-        .catalog-view-btn.view-btn-active { background-color: var(--c-primary); border-color: var(--c-primary); color: #fff; }
-        
-        .catalog-view-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
-        .catalog-view-container.list-view { display: flex; flex-direction: column; }
+        .full-width-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
 
-        .vehicle-card { background-color: var(--c-surface); border-radius: 12px; padding: 24px; border: 1px solid var(--c-border); transition: transform 0.3s, box-shadow 0.3s; }
-        .vehicle-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px var(--c-shadow); }
-        .vehicle-card h3 { font-size: 20px; font-weight: 700; }
-        .vehicle-card .vehicle-years { font-size: 14px; color: var(--c-on-surface-variant); margin-bottom: 16px; }
-        .vehicle-card .vehicle-desc { font-size: 15px; color: var(--c-on-surface); line-height: 1.6; }
-        #catalog-no-results { text-align: center; padding: 40px 0; }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--c-modal-backdrop); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; z-index: 1000; }
-        .modal-overlay.visible { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--c-surface); padding: 24px; border-radius: 12px; width: 90%; max-width: 450px; text-align: left; transform: scale(0.95); transition: transform 0.3s; }
-        .modal-overlay.visible .modal-content { transform: scale(1); }
-        .modal-icon { width: 48px; height: 48px; margin-bottom: 16px; }
-        .modal-content h3 { margin: 0 0 10px 0; font-size: 18px; text-align: center; }
-        .modal-content p { margin: 0 0 24px 0; color: var(--c-on-surface-variant); line-height: 1.6; text-align: center; }
-        .modal-actions { display: flex; gap: 12px; justify-content: center; }
-        .modal-btn { padding: 10px 24px; border-radius: 8px; border: none; font-weight: 600; }
-        .modal-btn.confirm { background-color: var(--c-error); color: #fff; }
-        .modal-btn.cancel { background-color: var(--c-border); color: var(--c-on-surface); }
-        
-        #toastNotification { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background-color: var(--c-primary); color: #fff; padding: 14px 28px; border-radius: 8px; box-shadow: 0 4px 15px var(--c-shadow); font-weight: 600; z-index: 3000; transition: bottom 0.5s ease-in-out; }
-        #toastNotification.show { bottom: 30px; }
-        #toastNotification.error { background-color: var(--c-error); }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
 
-        .loader { width: 48px; height: 48px; border: 5px solid var(--c-border); border-bottom-color: var(--c-primary); border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .stat-item {
+            position: relative;
+        }
 
-        .hidden { display: none !important; }
-        @keyframes shake { 25% { transform: translateX(6px); } 75% { transform: translateX(-2px); } }
+        .stat-item::after {
+            content: '';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 50%;
+            width: 1px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-item:last-child::after {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .stat-item::after {
+                display: none;
+            }
+        }
     </style>
 </head>
-<body>
 
-    <div id="splashScreen">
-        <div class="loader"></div>
-        <p>Loading Application...</p>
-    </div>
+<body class="bg-white antialiased">
 
-    <div id="authContainer" class="hidden">
-        <div class="auth-form-container">
-            <form id="loginForm">
-                <h2>Login</h2>
-                <div class="input-group"> <input type="email" id="loginEmail" class="input-field" placeholder="Email" required> </div>
-                <div class="input-group"> <input type="password" id="loginPassword" class="input-field" placeholder="Password" required> </div>
-                <button type="submit" class="btn btn-primary btn-full-width">Login</button>
-                <div class="auth-toggle-link"> Don't have an account? <button type="button" id="showSignup">Sign Up</button> </div>
-            </form>
-
-            <form id="signupForm" class="hidden">
-                <h2>Sign Up</h2>
-                <div class="input-group"> <input type="email" id="signupEmail" class="input-field" placeholder="Email" required> </div>
-                <div class="input-group"> <input type="password" id="signupPassword" class="input-field" placeholder="Password" required> </div>
-                <button type="submit" class="btn btn-primary btn-full-width">Create Account</button>
-                <div class="auth-toggle-link"> Already have an account? <button type="button" id="showLogin">Login</button> </div>
-            </form>
+    <nav class="container mx-auto px-6 py-6 flex justify-between items-center">
+        <div class="flex items-center space-x-1">
+            <span class="text-blue-600 font-bold text-2xl">Scheduler</span>
+            <span class="text-orange-400 font-bold text-2xl">TrainingHub</span>
         </div>
-    </div>
+    </nav>
 
-    <div id="appContainer" class="hidden">
-        <header class="main-header">
-            <div id="headerLeft">
-                <div id="headerTitle" class="header-title"></div>
-                <div class="search-container hidden" id="searchContainer">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="cardSearchInput" class="search-input" placeholder="Search templates...">
-                    <button id="clearSearchBtn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    <section class="bg-gradient-mesh py-24">
+        <div class="container mx-auto px-6 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
+                    <span class="text-gradient">Master Scheduling</span>
+                    <br>in Minutes
+                </h1>
+                <p class="text-gray-500 text-xl mb-10">
+                    Bite-sized, interactive lessons designed for the modern learner.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="./sign.html"
+                        class="btn-gradient text-white px-8 py-4 rounded-full flex items-center justify-center font-semibold text-lg hover:shadow-xl">
+                        Start Learning Now <i data-feather="arrow-right" class="ml-3 w-5 h-5"></i>
+                    </a>
+                    <a href="#how-it-works"
+                        class="bg-white border border-gray-200 text-gray-700 px-8 py-4 rounded-full flex items-center justify-center font-semibold text-lg hover:bg-gray-50 transition-colors">
+                        See How It Works
+                    </a>
                 </div>
-            </div>
-            <div class="header-controls">
-                <button id="backToSuiteBtn" class="header-btn hidden" aria-label="Back to Tool Suite">
-                    <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-                </button>
-                <button id="themeToggle" class="header-btn" aria-label="Toggle theme">
-                    <svg class="header-icon sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
-                    <svg class="header-icon moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
-                </button>
-                <button id="signOutBtn" class="header-btn" aria-label="Sign Out">
-                    <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                </button>
-            </div>
-        </header>
-
-        <main class="main-content">
-            <div id="toolSuitePage" class="page-content">
-                <div class="tool-suite-container">
-                    <div class="tool-card" id="navigateToHotAlerts">
-                        <svg class="tool-card-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                        <h3>Hot Alerts</h3>
-                        <p>Quickly generate and copy templated messages for customer communication.</p>
-                    </div>
-                    <div class="tool-card" id="navigateToTemplateManager">
-                        <svg class="tool-card-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                        <h3>Template Manager</h3>
-                        <p>Create, edit, and delete your own custom templates for the Hot Alerts tool.</p>
-                    </div>
-                    <div class="tool-card" id="navigateToCdjrCatalog">
-                        <svg class="tool-card-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16.5 17.5 13H22v-2h-4.5L14 7.5h-1.4L9 13H2v2h7l3.6 6.5H14zM5 7.5h1.4L10 2H8.6L5 7.5z"/></svg>
-                        <h3>CDJR Catalog</h3>
-                        <p>An interactive guide to models from Chrysler, Jeep, Dodge, Ram, and more.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="hotAlertsPage" class="page-content">
-                <aside class="sidebar" id="sidebar">
-                    <div class="sidebar-content">
-                        <div class="input-group"> <div class="select-wrapper"><select id="customerTitle" class="select-field"><option value="">Select Title</option><option value="Mr.">Mr.</option><option value="Mrs.">Mrs.</option><option value="Ms.">Ms.</option></select></div> </div>
-                        <div class="input-group"> <input type="text" id="customerName" class="input-field" placeholder="Customer Name"> </div>
-                        <div class="input-group"> <input type="text" id="phoneNumber" class="input-field" placeholder="Phone Number"> </div>
-                        <div class="input-group"> <input type="text" id="vehicle" class="input-field" placeholder="Vehicle (e.g., Toyota Camry)"> </div>
-                        <div class="input-group"> <input type="text" id="vin" class="input-field" placeholder="VIN (17 characters)" maxlength="17"> </div>
-                        <div class="input-group"> <input type="text" id="advisor" class="input-field" placeholder="Advisor Name"> </div>
-                        <div class="input-group"> <input type="text" id="schedule" class="input-field" placeholder="Schedule (e.g., Tomorrow 10 AM)"> </div>
-                        <div class="input-group"> <input type="text" id="accessoryParts" class="input-field" placeholder="Accessory / Parts"> </div>
-                        <div class="input-group"> <input type="text" id="tireBrandSize" class="input-field" placeholder="Tire Brand & Size"> </div>
-                        <div class="input-group"> <input type="text" id="service" class="input-field" placeholder="Service (e.g., Oil Change)"> </div>
-                        <div class="input-group"> <input type="text" id="otherConcern" class="input-field" placeholder="Other Concern"> </div>
-                        <div class="input-group"> <input type="text" id="recall" class="input-field" placeholder="RECALL Number or Description"> </div>
-                    </div>
-                    <div class="sidebar-footer"> <button class="btn btn-secondary btn-full-width" id="clearAllBtn">Clear All Fields</button> </div>
-                </aside>
-                <div class="card-container" id="cardContainer">
-                    <div class="loader hidden" id="loader"></div>
-                </div>
-            </div>
-                
-            <div id="manageTemplatesPage" class="page-content">
-                 <div class="settings-wrapper">
-                    <p>Select a template to preview or edit. You can also create a new custom template.</p>
-                    <div id="manageTemplatesContainer">
-                        <div class="template-controls">
-                           <div class="select-wrapper">
-                                <select id="templateSelect" class="select-field"></select>
-                            </div>
-                            <button id="addNewTemplateBtn" class="btn btn-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                New
-                            </button>
-                        </div>
-                        <div id="templateEditor">
-                             <!-- Editor will be rendered here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="cdjrCatalogPage" class="page-content">
-                <!-- CDJR Catalog content will be dynamically generated here -->
-            </div>
-
-        </main>
-    </div>
-
-    <div id="confirmationModal" class="modal-overlay">
-        <div class="modal-content">
-            <svg class="modal-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-            <h3 id="modalTitle"></h3>
-            <p id="modalMessage"></p>
-            <div class="modal-actions">
-                <button id="modalCancelBtn" class="modal-btn cancel">No, Cancel</button>
-                <button id="modalConfirmBtn" class="modal-btn confirm">Yes, Proceed</button>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div id="addVehicleModal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Add New Vehicle</h3>
-            <div class="input-group">
-                <label for="newVehicleBrand">Brand</label>
-                <div class="select-wrapper">
-                    <select id="newVehicleBrand" class="select-field">
-                        <option value="">Select Brand</option>
-                        <option value="Chrysler">Chrysler</option>
-                        <option value="Jeep">Jeep</option>
-                        <option value="Dodge">Dodge</option>
-                        <option value="Ram">Ram</option>
-                        <option value="Plymouth">Plymouth</option>
-                        <option value="Eagle">Eagle</option>
-                    </select>
+    <section class="py-16 border-b border-gray-100 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-wrap justify-center stat-item-container">
+                <div class="stat-item px-8 py-4 text-center">
+                    <div class="text-4xl font-bold text-indigo-600">95%</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-widest mt-2">Completion</div>
                 </div>
-            </div>
-            <div class="input-group">
-                <label for="newVehicleModel">Model Name</label>
-                <input type="text" id="newVehicleModel" class="input-field" placeholder="e.g., Pacifica">
-            </div>
-            <div class="input-group">
-                <label for="newVehicleYears">Years</label>
-                <input type="text" id="newVehicleYears" class="input-field" placeholder="e.g., 2017-Present">
-            </div>
-             <div class="input-group">
-                <label for="newVehicleCategory">Category</label>
-                <div class="select-wrapper">
-                    <select id="newVehicleCategory" class="select-field">
-                        <option value="">Select Category</option>
-                        <option value="current">Current & Future Models</option>
-                        <option value="past">Notable Past Models</option>
-                    </select>
+                <div class="stat-item px-8 py-4 text-center">
+                    <div class="text-4xl font-bold text-orange-400">10x</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-widest mt-2">Faster</div>
                 </div>
-            </div>
-            <div class="input-group">
-                <label for="newVehicleDescription">Description</label>
-                <textarea id="newVehicleDescription" class="input-field" rows="3" placeholder="A brief description of the vehicle..."></textarea>
-            </div>
-            <div class="modal-actions" style="margin-top: 24px;">
-                <button id="modalCancelAddVehicleBtn" class="btn btn-secondary">Cancel</button>
-                <button id="modalSaveVehicleBtn" class="btn btn-primary">Save Vehicle</button>
+                <div class="stat-item px-8 py-4 text-center">
+                    <div class="text-4xl font-bold text-indigo-600">35min</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-widest mt-2">Avg Lesson</div>
+                </div>
+                <div class="stat-item px-8 py-4 text-center">
+                    <div class="text-4xl font-bold text-orange-400">100%</div>
+                    <div class="text-sm text-gray-500 uppercase tracking-widest mt-2">Satisfaction</div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div id="toastNotification"></div>
+    <section id="how-it-works" class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-20">
+                <h2 class="text-4xl font-bold mb-6">Transform Your Skills in 3 Simple Steps</h2>
+                <p class="text-gray-500 text-lg">Our proven method makes mastering scheduling tools effortless and
+                    effective.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="feature-card bg-gray-50 p-10 rounded-2xl text-center hover:bg-white">
+                    <div
+                        class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-inner">
+                        1</div>
+                    <h3 class="font-bold text-xl mb-4">Pick Your Module</h3>
+                    <p class="text-gray-500 leading-relaxed">Choose from our library of scheduling tools. We cover all
+                        the major platforms.</p>
+                </div>
+                <div class="feature-card bg-gray-50 p-10 rounded-2xl text-center hover:bg-white">
+                    <div
+                        class="w-16 h-16 bg-orange-100 text-orange-400 rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-inner">
+                        2</div>
+                    <h3 class="font-bold text-xl mb-4">Interactive Learning</h3>
+                    <p class="text-gray-500 leading-relaxed">Engage with short, focused lessons that respect your time
+                        and attention span.</p>
+                </div>
+                <div class="feature-card bg-gray-50 p-10 rounded-2xl text-center hover:bg-white">
+                    <div
+                        class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 font-bold text-2xl shadow-inner">
+                        3</div>
+                    <h3 class="font-bold text-xl mb-4">Achieve Mastery</h3>
+                    <p class="text-gray-500 leading-relaxed">Earn your certification and show off your new scheduling
+                        superpowers!</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, onSnapshot, query, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <section class="full-width-gradient py-28 text-center relative">
+        <div class="absolute inset-0 opacity-10"
+            style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNwYXR0ZXJuKSIvPjwvc3ZnPg==')">
+        </div>
+        <div class="container mx-auto px-6 relative z-10">
+            <h2 class="text-4xl font-bold text-white mb-6">Ready to Revolutionize Your Scheduling Skills?</h2>
+            <p class="text-white/90 text-xl mb-10 max-w-2xl mx-auto">Join thousands of automotive professionals who have
+                transformed their scheduling efficiency with our platform.</p>
+            <a href="sign.html"
+                class="bg-white text-indigo-600 px-10 py-4 rounded-full font-bold text-lg inline-flex items-center hover:shadow-xl transition-all">
+                Get Started<i data-feather="arrow-right" class="ml-3 w-5 h-5"></i>
+            </a>
+        </div>
+    </section>
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hot-alerts-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-              apiKey: "AIzaSyCKJAYbGCKjxR3YpucDfGXDz9SuyBECb1I",
-              authDomain: "hot-alerts.firebaseapp.com",
-              projectId: "hot-alerts",
-              storageBucket: "hot-alerts.appspot.com",
-              messagingSenderId: "560371588593",
-              appId: "1:560371588593:web:e0d81dd80eb7ab5ec3f850",
-              measurementId: "G-EVX3VEJV0T"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        let userId = null;
-        let userTemplatesRef = null;
-        let publicTemplatesRef = null;
-        let cdjrCatalogRef = null;
-        let settingsDocRef = null;
-        let unsubscribeFromTemplates = null; 
-        let justAuthenticated = false;
-
-        // --- ONE-TIME DATA IMPORT SCRIPT ---
-        async function batchImportCdjrData() {
-            const vehicleData = [
-              { "brand": "Chrysler", "category": "current", "description": "The modern successor to the Town & Country. Also available as a class-leading Plug-in Hybrid (PHEV).", "modelName": "Chrysler Pacifica", "years": "Minivan | 2017-Present" },
-              { "brand": "Chrysler", "category": "current", "description": "Initially a budget-friendly version of the Pacifica, later transitioned to a fleet-exclusive model.", "modelName": "Chrysler Voyager", "years": "Minivan | 2020-Present" },
-              { "brand": "Chrysler", "category": "current", "description": "Represents the brand's future direction, pivoting towards an all-electric, premium crossover.", "modelName": "(Upcoming EV Crossover)", "years": "Crossover SUV | 2025/2026 (Expected)" },
-              { "brand": "Chrysler", "category": "past", "description": "An iconic rear-wheel-drive American sedan known for its bold styling and available HEMI V8 power.", "modelName": "Chrysler 300 / 300C", "years": "Full-Size Sedan | 2005-2023" },
-              { "brand": "Chrysler", "category": "past", "description": "Successor to the Sebring, offered with an advanced all-wheel-drive system.", "modelName": "Chrysler 200", "years": "Mid-Size Sedan | 2011-2017" },
-              { "brand": "Chrysler", "category": "past", "description": "The brand's flagship luxury minivan for decades, pioneering features like Stow 'n Go seating.", "modelName": "Chrysler Town & Country", "years": "Minivan | 1990-2016" },
-              { "brand": "Chrysler", "category": "past", "description": "A short-lived luxury SUV based on the Dodge Durango, notable for its available hybrid powertrain.", "modelName": "Chrysler Aspen", "years": "Full-Size SUV | 2007-2009" },
-              { "brand": "Chrysler", "category": "past", "description": "A family of influential \"cab-forward\" sedans that maximized interior space and defined 90s design.", "modelName": "Chrysler Concorde / LHS / 300M", "years": "Full-Size Sedan | 1993-2004" },
-              { "brand": "Chrysler", "category": "past", "description": "Long-running nameplates representing the peak of Chrysler luxury in the early 90s.", "modelName": "Chrysler New Yorker / Imperial", "years": "Full-Size Luxury Sedan | to 1996" },
-              { "brand": "Chrysler", "category": "past", "description": "A key member of the \"cloud cars\" (alongside Dodge Stratus), praised for its modern design.", "modelName": "Chrysler Cirrus", "years": "Mid-Size Sedan | 1995-2000" },
-              { "brand": "Chrysler", "category": "past", "description": "A cultural phenomenon, this retro-styled compact car offered unique versatility and a convertible model.", "modelName": "Chrysler PT Cruiser", "years": "Compact Hatchback | 2001-2010" },
-              { "brand": "Chrysler", "category": "past", "description": "A versatile nameplate used on multiple body styles, best known for its popular convertible version.", "modelName": "Chrysler Sebring", "years": "Mid-Size Sedan/Coupe/Convertible | 1995-2010" },
-              { "brand": "Chrysler", "category": "past", "description": "A unique sports car from the Daimler-Chrysler era, based on the Mercedes-Benz SLK platform.", "modelName": "Chrysler Crossfire", "years": "Sports Car | 2004-2008" },
-              { "brand": "Chrysler", "category": "past", "description": "A factory-built hot rod with an aluminum chassis. Initially launched as a Plymouth.", "modelName": "Chrysler Prowler", "years": "Sports Car | 1997-2002" },
-              { "brand": "Jeep", "category": "current", "description": "The undisputed icon of off-roading. Now in its JL generation, it includes the innovative 4xe Plug-in Hybrid model.", "modelName": "Jeep Wrangler", "years": "Off-Road SUV | 1987-Present" },
-              { "brand": "Jeep", "category": "current", "description": "Combines the open-air freedom and off-road capability of a Wrangler with the utility of a pickup truck bed.", "modelName": "Jeep Gladiator", "years": "Mid-Size Pickup | 2020-Present" },
-              { "brand": "Jeep", "category": "current", "description": "The benchmark for premium SUVs. Available in 2-row, 3-row (L), and 4xe PHEV versions.", "modelName": "Jeep Grand Cherokee", "years": "Mid-Size SUV | 1993-Present" },
-              { "brand": "Jeep", "category": "current", "description": "The return of a classic nameplate, representing the pinnacle of premium for the Jeep brand.", "modelName": "Jeep Wagoneer / Grand Wagoneer", "years": "Full-Size SUV | 2022-Present" },
-              { "brand": "Jeep", "category": "current", "description": "A global compact SUV, now in its second, more refined generation.", "modelName": "Jeep Compass", "years": "Compact Crossover | 2007-Present" },
-              { "brand": "Jeep", "category": "current", "description": "Jeep's entry into the subcompact segment with distinctive styling.", "modelName": "Jeep Renegade", "years": "Subcompact Crossover | 2015-Present" },
-              { "brand": "Jeep", "category": "current", "description": "Spearheading Jeep's electric future. The Recon is a rugged EV, while the Wagoneer S is a sleek, performance luxury EV.", "modelName": "Jeep Recon & Wagoneer S", "years": "Electric SUV | 2025 (Expected)" },
-              { "brand": "Jeep", "category": "past", "description": "The original XJ defined the modern SUV. The name was revived for the modern KL crossover.", "modelName": "Jeep Cherokee (XJ & KL)", "years": "Compact SUV | 1984-2001 & 2014-2023" },
-              { "brand": "Jeep", "category": "past", "description": "The pickup truck version of the legendary Cherokee XJ, prized by collectors.", "modelName": "Jeep Comanche (MJ)", "years": "Compact Pickup | 1985-1992" },
-              { "brand": "Jeep", "category": "past", "description": "The successor to the classic Cherokee, it featured independent front suspension for two generations.", "modelName": "Jeep Liberty", "years": "Compact SUV | 2002-2012" },
-              { "brand": "Jeep", "category": "past", "description": "A rugged, boxy, three-row SUV based on the Grand Cherokee platform.", "modelName": "Jeep Commander", "years": "Mid-Size SUV | 2006-2010" },
-              { "brand": "Jeep", "category": "past", "description": "A more traditionally styled, boxy counterpart to the first-generation Compass.", "modelName": "Jeep Patriot", "years": "Compact Crossover | 2007-2017" },
-              { "brand": "Dodge", "category": "current", "description": "The latest iteration offers both all-electric (Daytona) and twin-turbo I6 (Sixpack) powertrains.", "modelName": "Dodge Charger", "years": "Muscle Car | 2006-Present" },
-              { "brand": "Dodge", "category": "current", "description": "Dodge's entry into the performance CUV segment, offering a powerful R/T PHEV model.", "modelName": "Dodge Hornet", "years": "Compact Crossover | 2023-Present" },
-              { "brand": "Dodge", "category": "current", "description": "The \"three-row Charger,\" a unique SUV that blends utility with true muscle-car performance.", "modelName": "Dodge Durango", "years": "Full-Size SUV | 1998-Present" },
-              { "brand": "Dodge", "category": "past", "description": "A celebrated modern revival of the classic pony car, culminating in models like the Hellcat and Demon.", "modelName": "Dodge Challenger", "years": "Muscle Car | 2008-2023" },
-              { "brand": "Dodge", "category": "past", "description": "An uncompromising, raw American supercar powered by a massive V10 engine. A true legend.", "modelName": "Dodge Viper", "years": "Sports Car | 1992-2017" },
-              { "brand": "Dodge", "category": "past", "description": "A compact sedan based on an Alfa Romeo platform, offering distinctive style and options.", "modelName": "Dodge Dart", "years": "Compact Sedan | 2013-2016" },
-              { "brand": "Dodge", "category": "past", "description": "A popular and affordable crossover, often equipped with three rows of seating.", "modelName": "Dodge Journey", "years": "Mid-Size Crossover | 2009-2020" },
-              { "brand": "Dodge", "category": "past", "description": "The 5-door hatchback that replaced the Neon, including a high-performance SRT-4 version.", "modelName": "Dodge Caliber", "years": "Compact Hatchback | 2007-2012" },
-              { "brand": "Dodge", "category": "past", "description": "An aggressively styled SUV based on the Jeep Liberty platform.", "modelName": "Dodge Nitro", "years": "Compact SUV | 2007-2012" },
-              { "brand": "Dodge", "category": "past", "description": "A bold, rear-wheel-drive muscle wagon with Charger-inspired styling and available HEMI power.", "modelName": "Dodge Magnum", "years": "Station Wagon | 2005-2008" },
-              { "brand": "Dodge", "category": "past", "description": "The minivan that started it all, offering unparalleled value and practicality for families for over 35 years.", "modelName": "Dodge Grand Caravan", "years": "Minivan | 1984-2020" },
-              { "brand": "Dodge", "category": "past", "description": "A unique mid-size truck that stood out by offering an available V8 engine.", "modelName": "Dodge Dakota", "years": "Mid-Size Pickup | 1987-2011" },
-              { "brand": "Dodge", "category": "past", "description": "The classic, long-running full-size van that was a staple for work and travel.", "modelName": "Dodge Ram Van / Wagon", "years": "Full-Size Van | to 2003" },
-              { "brand": "Dodge", "category": "past", "description": "The classic two-door SUV based on the Ram pickup, a competitor to the Ford Bronco.", "modelName": "Dodge Ramcharger", "years": "Full-Size SUV | to 1993" },
-              { "brand": "Dodge", "category": "past", "description": "The Dodge flagship of the \"cab-forward\" era, offering a huge interior and sleek styling.", "modelName": "Dodge Intrepid", "years": "Full-Size Sedan | 1993-2004" },
-              { "brand": "Dodge", "category": "past", "description": "Dodge's \"cloud car\" counterpart to the Chrysler Cirrus, a popular family sedan.", "modelName": "Dodge Stratus", "years": "Mid-Size Sedan | 1995-2006" },
-              { "brand": "Dodge", "category": "past", "description": "A fun-to-drive and affordable compact car, famous for its \"Hi\" marketing and SRT-4 variant.", "modelName": "Dodge Neon", "years": "Compact Car | 1995-2005" },
-              { "brand": "Dodge", "category": "past", "description": "A rebadged Mitsubishi 3000GT, this was a high-tech, AWD sports car that was ahead of its time.", "modelName": "Dodge Stealth", "years": "Sports Car | 1991-1996" },
-              { "brand": "Ram", "category": "current", "description": "A leader in the truck segment, praised for its benchmark interiors and comfortable ride.", "modelName": "Ram 1500", "years": "Full-Size Pickup | 2010-Present" },
-              { "brand": "Ram", "category": "current", "description": "Ram's two-pronged approach to electrification: the all-electric REV and the innovative Ramcharger range-extended EV.", "modelName": "Ram 1500 REV / Ramcharger", "years": "Electric Pickup | 2025 (Expected)" },
-              { "brand": "Ram", "category": "current", "description": "The workhorses of the lineup, built for extreme towing with the available Cummins diesel engine.", "modelName": "Ram 2500/3500 Heavy Duty", "years": "Heavy Duty Pickup | 2010-Present" },
-              { "brand": "Ram", "category": "current", "description": "A highly capable and versatile front-wheel-drive commercial van based on the Fiat Ducato.", "modelName": "Ram ProMaster", "years": "Full-Size Van | 2014-Present" },
-              { "brand": "Ram", "category": "past", "description": "The truck line before Ram became a standalone brand. The 2nd Gen (1994-2001) revolutionized truck design.", "modelName": "Dodge Ram (Pre-2010)", "years": "Full-Size Pickup | 1981-2009" },
-              { "brand": "Ram", "category": "past", "description": "A smaller, more maneuverable work van designed for urban environments, based on the Fiat Doblò.", "modelName": "Ram ProMaster City", "years": "Compact Van | 2015-2022" },
-              { "brand": "Plymouth", "category": "past", "description": "The original branding for the retro-styled factory hot rod before it became a Chrysler.", "modelName": "Plymouth Prowler", "years": "Sports Car | 1997-2001" },
-              { "brand": "Plymouth", "category": "past", "description": "The Plymouth version of the popular and fun-to-drive compact sedan and coupe.", "modelName": "Plymouth Neon", "years": "Compact Car | 1995-2001" },
-              { "brand": "Plymouth", "category": "past", "description": "The Plymouth version of the groundbreaking minivan that created a segment.", "modelName": "Plymouth Voyager / Grand Voyager", "years": "Minivan | to 2000" },
-              { "brand": "Plymouth", "category": "past", "description": "The Plymouth \"cloud car\" sibling to the Chrysler Cirrus and Dodge Stratus.", "modelName": "Plymouth Breeze", "years": "Mid-Size Sedan | 1996-2000" },
-              { "brand": "Plymouth", "category": "past", "description": "A reliable and popular sedan from the K-car platform lineage.", "modelName": "Plymouth Acclaim", "years": "Mid-Size Sedan | to 1995" },
-              { "brand": "Plymouth", "category": "past", "description": "A sibling to the Mitsubishi Eclipse and Eagle Talon, part of the Diamond-Star Motors venture.", "modelName": "Plymouth Laser", "years": "Sports Coupe | to 1994" },
-              { "brand": "Eagle", "category": "past", "description": "A popular sports coupe from the Diamond-Star Motors venture, known for its available turbo and AWD.", "modelName": "Eagle Talon", "years": "Sports Coupe | to 1998" },
-              { "brand": "Eagle", "category": "past", "description": "The Eagle version of the innovative \"cab-forward\" sedans, marketed as a sportier alternative.", "modelName": "Eagle Vision", "years": "Full-Size Sedan | 1993-1997" }
-            ];
-
-            const publicPath = `artifacts/${appId}/public/data`;
-            const catalogRef = collection(db, `${publicPath}/cdjr_catalog`);
-
-            console.log("Checking for existing data...");
-            const existingDocs = await getDocs(query(catalogRef));
-            if (!existingDocs.empty) {
-                console.warn("Data already exists in the 'cdjr_catalog' collection. Aborting import to prevent duplicates.");
-                alert("The CDJR Catalog data has already been imported. You don't need to run this script again.");
-                return;
-            }
-
-            console.log(`Starting import of ${vehicleData.length} vehicles...`);
-            
-            const batch = writeBatch(db);
-            
-            vehicleData.forEach(vehicle => {
-                const newDocRef = doc(catalogRef);
-                batch.set(newDocRef, vehicle);
-            });
-
-            try {
-                await batch.commit();
-                console.log("✅ Success! All vehicle documents have been added to Firestore.");
-                alert("✅ Success! All vehicle documents have been added to Firestore. Please refresh the application to see the catalog.");
-            } catch (error) {
-                console.error("❌ Error writing batch to Firestore:", error);
-                alert("❌ An error occurred during the import. Check the console for details.");
-            }
-        }
-        window.runCdjrImport = batchImportCdjrData;
-
-        // --- CUSTOM COMBOBOX/SELECT SCRIPT (REFACTORED & FIXED) ---
-
-        function closeAllSelects(exceptThisOne) {
-            document.querySelectorAll('.select-items').forEach(item => {
-                if (item.previousElementSibling !== exceptThisOne) {
-                    item.classList.add('select-hide');
-                }
-            });
-            document.querySelectorAll('.select-selected').forEach(item => {
-                if (item !== exceptThisOne) {
-                    item.classList.remove('select-arrow-active');
-                }
-            });
-        }
-
-        function createOptionDiv(option, nativeSelect, selectedItem, optionsList) {
-            const optionDiv = document.createElement('div');
-            optionDiv.textContent = option.textContent;
-            if (nativeSelect.value === option.value) {
-                optionDiv.classList.add('same-as-selected');
-            }
-
-            optionDiv.addEventListener('click', (e) => {
-                e.stopPropagation();
-                nativeSelect.value = option.value;
-                selectedItem.textContent = option.textContent;
-                
-                const currentSelected = optionsList.querySelector('.same-as-selected');
-                if (currentSelected) {
-                    currentSelected.classList.remove('same-as-selected');
-                }
-                optionDiv.classList.add('same-as-selected');
-                
-                nativeSelect.dispatchEvent(new Event('input', { bubbles: true }));
-                nativeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-
-                closeAllSelects();
-            });
-            return optionDiv;
-        }
-
-        function buildCustomSelect(wrapper) {
-            const nativeSelect = wrapper.querySelector('select.select-field');
-            if (!nativeSelect) return;
-
-            // Clear any previous custom elements to prevent duplication on re-build
-            wrapper.querySelectorAll('.select-selected, .select-items').forEach(el => el.remove());
-
-            nativeSelect.style.display = 'none';
-
-            const selectedItem = document.createElement('div');
-            selectedItem.className = 'select-selected';
-            // FIX: Safely access textContent, providing a fallback for empty selects
-            selectedItem.textContent = nativeSelect.options[nativeSelect.selectedIndex]?.textContent || (nativeSelect.options[0]?.textContent || 'Select...');
-            
-            const optionsList = document.createElement('div');
-            optionsList.className = 'select-items select-hide';
-
-            Array.from(nativeSelect.children).forEach(child => {
-                if (child.tagName.toLowerCase() === 'optgroup') {
-                    const optgroupDiv = document.createElement('div');
-                    optgroupDiv.className = 'optgroup';
-                    optgroupDiv.textContent = child.label;
-                    optionsList.appendChild(optgroupDiv);
-
-                    Array.from(child.children).forEach(option => {
-                        const optionDiv = createOptionDiv(option, nativeSelect, selectedItem, optionsList);
-                        optionsList.appendChild(optionDiv);
-                    });
-                } else if (child.tagName.toLowerCase() === 'option') {
-                     if (child.value || child.textContent) {
-                        const optionDiv = createOptionDiv(child, nativeSelect, selectedItem, optionsList);
-                        optionsList.appendChild(optionDiv);
-                     }
-                }
-            });
-            
-            wrapper.appendChild(selectedItem);
-            wrapper.appendChild(optionsList);
-            
-            selectedItem.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isAlreadyOpen = !optionsList.classList.contains('select-hide');
-                closeAllSelects(isAlreadyOpen ? null : selectedItem);
-                optionsList.classList.toggle('select-hide');
-                selectedItem.classList.toggle('select-arrow-active');
-            });
-        }
-
-        function initializeCustomSelects() {
-            document.querySelectorAll('.select-wrapper').forEach(buildCustomSelect);
-            document.addEventListener('click', () => closeAllSelects(null));
-        }
-
-
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            initializeCustomSelects();
-
-            let combinedTemplates = [];
-            let publicTmpls = [];
-            let userTmpls = [];
-            let cdjrVehicles = []; // To store fetched vehicle data
-            const fieldDisplayNames = { 
-                customerTitle: "Select Title", 
-                customerName: "Customer Name", 
-                phoneNumber: "Phone Number", 
-                vehicle: "Vehicle", 
-                vin: "VIN", 
-                advisor: "Advisor", 
-                schedule: "Schedule", 
-                accessoryParts: "Accessory / Parts", 
-                tireBrandSize: "Tire Brand & Size", 
-                service: "Service", 
-                otherConcern: "Other Concern", 
-                recall: "RECALL",
-                numberOfTires: "Number of Tires"
-            };
-            const appState = { currentView: 'toolSuite', editorMode: 'none', selectedTemplateId: null, hiddenTemplates: [] };
-            const body = document.body;
-            
-            const splashScreen = document.getElementById('splashScreen');
-            const authContainer = document.getElementById('authContainer');
-            const appContainer = document.getElementById('appContainer');
-            const allPageContents = document.querySelectorAll('.page-content');
-            
-            const loginForm = document.getElementById('loginForm');
-            const signupForm = document.getElementById('signupForm');
-            const showSignupBtn = document.getElementById('showSignup');
-            const showLoginBtn = document.getElementById('showLogin');
-            const signOutBtn = document.getElementById('signOutBtn');
-
-            const headerTitle = document.getElementById('headerTitle');
-            const searchContainer = document.getElementById('searchContainer');
-            const backToSuiteBtn = document.getElementById('backToSuiteBtn');
-            const cardSearchInput = document.getElementById('cardSearchInput');
-            const clearSearchBtn = document.getElementById('clearSearchBtn');
-
-            const navigateToHotAlerts = document.getElementById('navigateToHotAlerts');
-            const navigateToTemplateManager = document.getElementById('navigateToTemplateManager');
-            const navigateToCdjrCatalog = document.getElementById('navigateToCdjrCatalog');
-
-            const cardContainer = document.getElementById('cardContainer');
-            const loader = document.getElementById('loader');
-            
-            const manageTemplatesContainer = document.getElementById('manageTemplatesContainer');
-            const templateSelect = document.getElementById('templateSelect');
-            const addNewTemplateBtn = document.getElementById('addNewTemplateBtn');
-            const templateEditor = document.getElementById('templateEditor');
-
-            const modal = document.getElementById('confirmationModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalConfirmBtn = document.getElementById('modalConfirmBtn');
-            const modalCancelBtn = document.getElementById('modalCancelBtn');
-            const toastNotification = document.getElementById('toastNotification');
-            let confirmCallback = null;
-
-            function renderCurrentView(view) {
-                appState.currentView = view;
-
-                allPageContents.forEach(page => page.classList.remove('active'));
-                document.getElementById(`${view}Page`).classList.add('active');
-                
-                searchContainer.classList.add('hidden');
-                backToSuiteBtn.classList.add('hidden');
-
-                const toolSuiteSVG = `<svg class="header-page-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`;
-                const hotAlertsLogoSVG = `<svg class="header-page-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
-                const manageTemplatesSVG = `<svg class="header-page-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-                const cdjrCatalogSVG = `<svg class="header-page-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16.5 17.5 13H22v-2h-4.5L14 7.5h-1.4L9 13H2v2h7l3.6 6.5H14zM5 7.5h1.4L10 2H8.6L5 7.5z"/></svg>`;
-
-                if (view === 'toolSuite') {
-                    headerTitle.innerHTML = `${toolSuiteSVG} <span>Tool Suite</span>`;
-                } else if (view === 'hotAlerts') {
-                    searchContainer.classList.remove('hidden');
-                    backToSuiteBtn.classList.remove('hidden');
-                    headerTitle.innerHTML = `${hotAlertsLogoSVG} <span>Hot Alerts</span>`;
-                    if (cardContainer.innerHTML.trim() === '') {
-                        cardContainer.classList.add('loading');
-                        loader.classList.remove('hidden');
-                        cardContainer.appendChild(loader);
-                        setTimeout(() => {
-                            cardContainer.classList.remove('loading');
-                            loader.classList.add('hidden');
-                            renderAllCards();
-                        }, 200);
-                    }
-                } else if (view === 'manageTemplates') {
-                    backToSuiteBtn.classList.remove('hidden');
-                    headerTitle.innerHTML = `${manageTemplatesSVG} <span>Template Manager</span>`;
-                    renderManageTemplatesView();
-                } else if (view === 'cdjrCatalog') {
-                    backToSuiteBtn.classList.remove('hidden');
-                    headerTitle.innerHTML = `${cdjrCatalogSVG} <span>CDJR Catalog</span>`;
-                    loadCdjrCatalog();
-                }
-            }
-
-
-            // --- Firestore Functions ---
-            async function addTemplate(templateData) {
-                if (!userTemplatesRef) return;
-                try { await addDoc(userTemplatesRef, templateData); } catch (e) { console.error("Error adding document: ", e); }
-            }
-
-            async function updateTemplate(id, templateData) {
-                if (!userTemplatesRef) return;
-                try {
-                    const templateDocRef = doc(userTemplatesRef, id);
-                    await setDoc(templateDocRef, templateData);
-                } catch (e) { console.error("Error updating document: ", e); }
-            }
-
-            async function deleteTemplate(id) {
-                if (!userTemplatesRef) return;
-                try {
-                    const templateDocRef = doc(userTemplatesRef, id);
-                    await deleteDoc(templateDocRef);
-                } catch (e) { console.error("Error deleting document: ", e); }
-            }
-            
-            async function saveUserPreference(key, value) {
-                if (!settingsDocRef) return;
-                try { await setDoc(settingsDocRef, { [key]: value }, { merge: true }); } catch (e) { console.error(`Error saving preference '${key}':`, e); }
-            }
-            
-            async function initializeUserSettings() {
-                if (!settingsDocRef) return;
-                const docSnap = await getDoc(settingsDocRef);
-                if (!docSnap.exists()) {
-                    await setDoc(settingsDocRef, { theme: 'dark', hiddenTemplates: [] });
-                    body.classList.remove('light-mode');
-                    appState.hiddenTemplates = [];
-                } else {
-                    const prefs = docSnap.data();
-                    if (prefs.theme === 'light') body.classList.add('light-mode'); else body.classList.remove('light-mode');
-                    appState.hiddenTemplates = prefs.hiddenTemplates || [];
-                }
-            }
-
-            function mergeAndRenderTemplates(userSnapshot) {
-                userTmpls = userSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isPublic: false, isCustom: true }));
-                
-                const visiblePublicTmpls = publicTmpls.filter(t => !appState.hiddenTemplates.includes(t.id));
-                combinedTemplates = [...visiblePublicTmpls, ...userTmpls].sort((a, b) => a.title.localeCompare(b.title));
-                
-                if (appState.currentView === 'hotAlerts') {
-                    renderAllCards();
-                }
-                
-                if(appState.currentView === 'manageTemplates') {
-                    renderManageTemplatesView();
-                }
-            }
-
-            function showToast(message, isError = false) {
-                toastNotification.textContent = message;
-                toastNotification.classList.toggle('error', isError);
-                toastNotification.classList.add('show');
-                setTimeout(() => { toastNotification.classList.remove('show'); }, 3000);
-            }
-
-            function renderAllCards() {
-                cardContainer.innerHTML = '';
-                if (combinedTemplates.length === 0) {
-                    cardContainer.innerHTML = `<div class="editor-placeholder"><p>No templates to display.</p><p>You can unhide default templates or create your own in the Template Manager.</p></div>`;
-                    return;
-                }
-                combinedTemplates.forEach(addCardToDOM);
-            }
-
-            function addCardToDOM(templateData) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.dataset.id = templateData.id; 
-                card.dataset.title = templateData.title.toLowerCase();
-                const required = (templateData.template.match(/\[\[(.*?)\]\]/g) || []).map(v => v.slice(2, -2));
-                card.dataset.required = [...new Set(required)].join(',');
-
-                card.innerHTML = `
-                    <div class="card-header">
-                        <span class="card-title">${templateData.title} ${templateData.isCustom ? ' (Custom)' : ''}</span>
-                        <svg class="card-toggle-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    <section class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-20">
+                <h2 class="text-4xl font-bold mb-6">Why Scheduler Training Hub</h2>
+                <p class="text-gray-500 text-lg">Designed exclusively for automotive service professionals by industry
+                    experts.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="feature-card bg-gray-50 p-8 rounded-xl text-center hover:bg-white">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-feather="zap" class="w-6 h-6 text-indigo-600"></i>
                     </div>
-                    <div class="card-body">
-                        <div class="in-card-controls"></div> <!-- Placeholder for special controls -->
-                        <div class="template-preview"></div>
-                        <div class="warning-message"></div>
-                        <button class="btn btn-primary copy-btn">Copy Template</button>
+                    <h4 class="font-bold text-lg mb-3">Quick Lessons</h4>
+                    <p class="text-sm text-gray-500">10-40 minute modules designed for busy professionals</p>
+                </div>
+                <div class="feature-card bg-gray-50 p-8 rounded-xl text-center hover:bg-white">
+                    <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-feather="clock" class="w-6 h-6 text-orange-400"></i>
                     </div>
-                `;
-
-                if (templateData.title.toLowerCase() === 'tire') {
-                    const inCardControls = card.querySelector('.in-card-controls');
-                    const tireSelectWrapper = document.createElement('div');
-                    tireSelectWrapper.className = 'select-wrapper input-group';
-                    
-                    const tireSelect = document.createElement('select');
-                    tireSelect.className = 'select-field';
-                    tireSelect.dataset.fieldId = 'numberOfTires';
-
-                    const options = ["Select number of tires", "One tire", "Two tires", "Three tires", "Four tires"];
-                    options.forEach((optText, index) => {
-                        const option = document.createElement('option');
-                        option.value = (index === 0) ? "" : optText;
-                        option.textContent = optText;
-                        tireSelect.appendChild(option);
-                    });
-
-                    tireSelectWrapper.appendChild(tireSelect);
-                    inCardControls.appendChild(tireSelectWrapper);
-                    buildCustomSelect(tireSelectWrapper);
-                }
-
-                cardContainer.appendChild(card);
-                card.querySelector('.card-header').addEventListener('click', () => toggleCard(card));
-                card.querySelector('.copy-btn').addEventListener('click', () => copyTemplate(card));
-            }
-            
-            async function handleHideTemplate(templateId) {
-                if (!appState.hiddenTemplates.includes(templateId)) {
-                    appState.hiddenTemplates.push(templateId);
-                    await saveUserPreference('hiddenTemplates', appState.hiddenTemplates);
-                    showToast("Template hidden.");
-                    mergeAndRenderTemplates({ docs: userTmpls.map(t => ({ id: t.id, data: () => t })) });
-                    handleCancelAction();
-                }
-            }
-
-            async function handleUnhideTemplate(templateId) {
-                appState.hiddenTemplates = appState.hiddenTemplates.filter(id => id !== templateId);
-                await saveUserPreference('hiddenTemplates', appState.hiddenTemplates);
-                showToast("Template unhidden.");
-                mergeAndRenderTemplates({ docs: userTmpls.map(t => ({ id: t.id, data: () => t })) });
-                handleCancelAction();
-            }
-
-            function renderManageTemplatesView() {
-                populateTemplateSelect();
-                renderEditorForSelection();
-            }
-
-            function populateTemplateSelect() {
-                const selectedValue = templateSelect.value;
-                templateSelect.innerHTML = '<option value="">Select a template...</option>';
-                
-                const customOptGroup = document.createElement('optgroup');
-                customOptGroup.label = 'Custom Templates';
-                userTmpls.sort((a,b) => a.title.localeCompare(b.title)).forEach(template => {
-                    const option = document.createElement('option');
-                    option.value = template.id;
-                    option.textContent = template.title;
-                    customOptGroup.appendChild(option);
-                });
-                templateSelect.appendChild(customOptGroup);
-
-                const defaultOptGroup = document.createElement('optgroup');
-                defaultOptGroup.label = 'Default Templates';
-                publicTmpls.sort((a,b) => a.title.localeCompare(b.title)).forEach(template => {
-                    const isHidden = appState.hiddenTemplates.includes(template.id);
-                    const option = document.createElement('option');
-                    option.value = template.id;
-                    option.textContent = `${template.title} ${isHidden ? '(Hidden)' : ''}`;
-                    defaultOptGroup.appendChild(option);
-                });
-                templateSelect.appendChild(defaultOptGroup);
-
-                templateSelect.value = selectedValue;
-                
-                const wrapper = document.querySelector('#manageTemplatesPage .select-wrapper');
-                if (wrapper) {
-                    buildCustomSelect(wrapper);
-                }
-            }
-
-            function renderEditorForSelection() {
-                const selectedId = templateSelect.value;
-                appState.selectedTemplateId = selectedId;
-
-                if (!selectedId) {
-                    manageTemplatesContainer.style.minHeight = '200px';
-                    templateEditor.innerHTML = `<div class="editor-placeholder">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path><polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon></svg>
-                        <p>Select a template to preview or edit, or create a new one.</p>
-                    </div>`;
-                    return;
-                }
-
-                const templateData = [...publicTmpls, ...userTmpls].find(t => t.id === selectedId);
-                if (!templateData) return;
-
-                if (templateData.isCustom) {
-                    appState.editorMode = 'edit';
-                    renderFullEditor(templateData);
-                } else {
-                    appState.editorMode = 'preview';
-                    renderPreview(templateData);
-                }
-            }
-
-            function renderFullEditor(templateData) {
-                manageTemplatesContainer.style.minHeight = '600px';
-                templateEditor.innerHTML = `
-                    <div class="setting-item">
-                        <label for="templateTitle">Template Title</label>
-                        <input type="text" id="templateTitle" class="input-field" placeholder="e.g., Follow-up Call" value="${templateData.title}">
+                    <h4 class="font-bold text-lg mb-3">Learn Anytime</h4>
+                    <p class="text-sm text-gray-500">24/7 access from any device with progress sync</p>
+                </div>
+                <div class="feature-card bg-gray-50 p-8 rounded-xl text-center hover:bg-white">
+                    <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-feather="award" class="w-6 h-6 text-indigo-600"></i>
                     </div>
-                    <div class="setting-item">
-                        <label>Available Fields (Click to insert)</label>
-                        <div id="availableFields"></div>
+                    <h4 class="font-bold text-lg mb-3">Get Certified</h4>
+                    <p class="text-sm text-gray-500">Industry-recognized certificates for your resume</p>
+                </div>
+                <div class="feature-card bg-gray-50 p-8 rounded-xl text-center hover:bg-white">
+                    <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-feather="users" class="w-6 h-6 text-green-500"></i>
                     </div>
-                    <div class="setting-item template-body-item">
-                        <label for="templateBody">Template Body</label>
-                        <textarea id="templateBody" class="template-body-textarea" placeholder="Compose template... e.g., Good day, This is [[advisor]]...">${templateData.template}</textarea>
-                    </div>
-                    <div id="requiredFieldsIndicator" class="required-fields-indicator"></div>
-                    <div class="editor-actions">
-                        <button id="deleteTemplateBtn" class="btn btn-danger">Delete</button>
-                        <button id="cancelActionBtn" class="btn btn-secondary">Cancel</button>
-                        <button id="saveActionBtn" class="btn btn-primary">${appState.editorMode === 'add' ? 'Save as New Custom Template' : 'Save Changes'}</button>
-                    </div>
-                `;
+                    <h4 class="font-bold text-lg mb-3">Team Training</h4>
+                    <p class="text-sm text-gray-500">Comprehensive analytics for team progress tracking</p>
+                </div>
+            </div>
+        </div>
+        <div class="text-center max-w-2xl mx-auto mb-20"></div>
+    </section>
 
-                const bodyTextarea = document.getElementById('templateBody');
-                const availableFieldsContainer = document.getElementById('availableFields');
-                const requiredIndicator = document.getElementById('requiredFieldsIndicator');
+    <div id="footer-container"></div>
 
-                populateAvailableFields(availableFieldsContainer, bodyTextarea);
-                updateRequiredFieldsIndicator(bodyTextarea, requiredIndicator);
+    <script>
+        feather.replace();
 
-                bodyTextarea.addEventListener('input', () => updateRequiredFieldsIndicator(bodyTextarea, requiredIndicator));
-                document.getElementById('cancelActionBtn').addEventListener('click', handleCancelAction);
-                document.getElementById('saveActionBtn').addEventListener('click', handleSaveAction);
-                document.getElementById('deleteTemplateBtn').addEventListener('click', () => handleDeleteTemplate(templateData.id));
-            }
-
-            function renderPreview(templateData) {
-                manageTemplatesContainer.style.minHeight = '350px';
-                const isHidden = appState.hiddenTemplates.includes(templateData.id);
-                templateEditor.innerHTML = `
-                    <div class="setting-item">
-                        <label>Template Preview</label>
-                        <div class="template-preview">${templateData.template.replace(/\[\[(.*?)\]\]/g, '<span class="empty">[$1]</span>')}</div>
-                    </div>
-                    <div class="editor-actions">
-                         <button id="cancelActionBtn" class="btn btn-secondary">Cancel</button>
-                         <button id="visibilityToggleBtn" class="btn ${isHidden ? 'btn-primary' : 'btn-secondary'}">${isHidden ? 'Unhide' : 'Hide'}</button>
-                    </div>
-                `;
-                document.getElementById('cancelActionBtn').addEventListener('click', handleCancelAction);
-                document.getElementById('visibilityToggleBtn').addEventListener('click', () => {
-                    if (isHidden) handleUnhideTemplate(templateData.id);
-                    else handleHideTemplate(templateData.id);
-                });
-            }
-
-            function populateAvailableFields(container, textarea) {
-                container.innerHTML = '';
-                for (const [id, name] of Object.entries(fieldDisplayNames)) {
-                    const tag = document.createElement('span');
-                    tag.className = 'field-tag';
-                    tag.textContent = name;
-                    tag.addEventListener('click', () => {
-                        const { selectionStart, selectionEnd } = textarea;
-                        const textToInsert = `[[${id}]]`;
-                        textarea.value = textarea.value.substring(0, selectionStart) + textToInsert + textarea.value.substring(selectionEnd);
-                        textarea.focus();
-                        textarea.selectionStart = textarea.selectionEnd = selectionStart + textToInsert.length;
-                        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    });
-                    container.appendChild(tag);
-                }
-            }
-
-            function updateRequiredFieldsIndicator(textarea, indicatorElement) {
-                const foundFields = textarea.value.match(/\[\[(.*?)\]\]/g) || [];
-                const uniqueFieldIds = [...new Set(foundFields.map(f => f.slice(2, -2)))];
-                
-                if (uniqueFieldIds.length === 0) {
-                    indicatorElement.innerHTML = '<strong>Required Fields Detected:</strong> None';
-                    return;
-                }
-                const fieldSpans = uniqueFieldIds.map(id => `<span>${fieldDisplayNames[id] || id}</span>`).join('');
-                indicatorElement.innerHTML = `<strong>Required Fields Detected:</strong> ${fieldSpans}`;
-            }
-
-            function handleAddNewClick() {
-                appState.selectedTemplateId = 'new-template';
-                appState.editorMode = 'add';
-                templateSelect.value = '';
-                const customSelect = document.querySelector('#manageTemplatesPage .select-selected');
-                if (customSelect) customSelect.textContent = 'Select a template...';
-                renderFullEditor({title: '', template: ''});
-            }
-
-            function handleCancelAction() {
-                appState.selectedTemplateId = null;
-                appState.editorMode = 'none';
-                templateSelect.value = '';
-                const customSelect = document.querySelector('#manageTemplatesPage .select-selected');
-                if (customSelect) customSelect.textContent = 'Select a template...';
-                renderEditorForSelection();
-            }
-
-            async function handleSaveAction() {
-                const titleInput = document.getElementById('templateTitle');
-                const bodyInput = document.getElementById('templateBody');
-                const title = titleInput.value.trim();
-                const template = bodyInput.value.trim();
-                const currentTemplate = [...publicTmpls, ...userTmpls].find(t => t.id === appState.selectedTemplateId);
-
-                if (!title || !template) {
-                    if (!title) titleInput.classList.add('missing');
-                    if (!template) bodyInput.classList.add('missing');
-                    showToast("Title and body cannot be empty.", true);
-                    return;
-                }
-                titleInput.classList.remove('missing');
-                bodyInput.classList.remove('missing');
-
-                const templateData = { title, template };
-
-                const isCreating = appState.editorMode === 'add';
-                const isUpdating = appState.editorMode === 'edit' && currentTemplate && currentTemplate.isCustom;
-
-                if (isCreating) {
-                    const duplicate = [...publicTmpls, ...userTmpls].find(t => t.title.toLowerCase() === title.toLowerCase());
-                    if (duplicate) { showToast("A template with this title already exists.", true); titleInput.classList.add('missing'); return; }
-                    await addTemplate(templateData);
-                    showToast("Custom template saved successfully!");
-                    handleCancelAction();
-                } else if (isUpdating) {
-                     const duplicate = [...publicTmpls, ...userTmpls].find(t => t.id !== currentTemplate.id && t.title.toLowerCase() === title.toLowerCase());
-                    if (duplicate) { showToast("Another template with this title already exists.", true); titleInput.classList.add('missing'); return; }
-                    await updateTemplate(currentTemplate.id, templateData);
-                    showToast("Template updated successfully!");
-                    handleCancelAction();
-                }
-            }
-            
-            async function handleDeleteTemplate(templateId) {
-                if (!templateId) return;
-                showConfirmationModal(
-                    'Delete Template', 'Are you sure you want to permanently delete this custom template?',
-                    async () => {
-                        await deleteTemplate(templateId);
-                        hideConfirmationModal();
-                        showToast("Template deleted.");
-                        handleCancelAction();
-                    }
-                );
-            }
-
-            function showConfirmationModal(title, message, onConfirm) {
-                modalTitle.textContent = title;
-                modalMessage.textContent = message;
-                confirmCallback = onConfirm;
-                modal.classList.add('visible');
-            }
-            
-            function hideConfirmationModal() {
-                modal.classList.remove('visible');
-                confirmCallback = null;
-            }
-
-            function getFormattedValue(fieldId, value) { value = value.trim(); if (!value) return value; switch (fieldId) { case 'customerName': case 'advisor': case 'accessoryParts': case 'service': return value.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '); case 'vehicle': case 'vin': case 'schedule': case 'tireBrandSize': return value.toUpperCase(); case 'otherConcern': return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(); default: return value; } }
-            
-            function toggleCard(card) { 
-                document.querySelectorAll('.card.expanded').forEach(openCard => { 
-                    if (openCard !== card) openCard.classList.remove('expanded'); 
-                }); 
-                document.querySelectorAll('.missing').forEach(el => el.classList.remove('missing')); 
-                card.classList.toggle('expanded'); 
-                if (card.classList.contains('expanded')) {
-                    updateCardContent(card);
-                }
-            }
-            
-            function updateAllCards() { 
-                document.querySelectorAll('.card.expanded').forEach(updateCardContent); 
-            }
-            
-            function copyTemplate(card) { 
-                const preview = card.querySelector('.template-preview'); 
-                const copyBtn = card.querySelector('.copy-btn'); 
-                const tempTextArea = document.createElement('textarea'); 
-                tempTextArea.value = preview.innerText; 
-                document.body.appendChild(tempTextArea); 
-                tempTextArea.select(); 
-                document.execCommand('copy'); 
-                document.body.removeChild(tempTextArea); 
-                copyBtn.textContent = 'Copied!'; 
-                setTimeout(() => { copyBtn.textContent = 'Copy Template'; }, 1500); 
-            }
-            
-            function clearAllFields() { 
-                const clearButton = document.getElementById('clearAllBtn'); 
-                document.querySelectorAll('.sidebar-content .input-field').forEach(input => { input.value = ''; input.classList.remove('missing'); }); 
-                document.querySelectorAll('.sidebar-content .select-field').forEach(select => { 
-                    select.value = ''; 
-                    select.classList.remove('missing');
-                    const customSelect = select.closest('.select-wrapper').querySelector('.select-selected'); 
-                    if (customSelect) { 
-                        customSelect.textContent = select.options[0].textContent; 
-                        customSelect.classList.remove('missing');
-                        const customOptions = select.closest('.select-wrapper').querySelector('.select-items'); 
-                        if(customOptions) { 
-                            const current = customOptions.querySelector('.same-as-selected'); 
-                            if(current) current.classList.remove('same-as-selected'); 
-                        } 
-                    } 
-                }); 
-                updateAllCards(); 
-                clearButton.textContent = 'Cleared!'; 
-                setTimeout(() => { clearButton.textContent = 'Clear All Fields'; }, 1500); 
-            }
-
-            function updateCardContent(card) {
-                const templateId = card.dataset.id;
-                const templateData = combinedTemplates.find(t => t.id === templateId);
-                if (!templateData) return;
-
-                const requiredFields = card.dataset.required ? card.dataset.required.split(',') : [];
-                const preview = card.querySelector('.template-preview');
-                const warning = card.querySelector('.warning-message');
-                const copyBtn = card.querySelector('.copy-btn');
-                let allRequiredFilled = true;
-                const missingFieldNames = new Set();
-                
-                const fieldValues = {};
-
-                requiredFields.forEach(fieldId => {
-                    if (!fieldId) return;
-                    let element = document.getElementById(fieldId) || card.querySelector(`[data-field-id="${fieldId}"]`);
-                    
-                    if (element && !element.value.trim()) {
-                        allRequiredFilled = false;
-                        missingFieldNames.add(fieldDisplayNames[fieldId] || fieldId);
-                        
-                        let elementToMark = element.closest('.select-wrapper')?.querySelector('.select-selected') || element;
-                        elementToMark.classList.add('missing');
-                    } else if (element) {
-                        let elementToUnmark = element.closest('.select-wrapper')?.querySelector('.select-selected') || element;
-                        elementToUnmark.classList.remove('missing');
-                    }
-                    fieldValues[fieldId] = element ? element.value : '';
-                });
-
-                const renderedTemplate = templateData.template.replace(/\[\[(.*?)\]\]/g, (_, fieldId) => {
-                    const value = fieldValues[fieldId] || '';
-                    const formattedValue = getFormattedValue(fieldId, value);
-                    return formattedValue ? `<span class="filled">${formattedValue}</span>` : `<span class="empty">[${fieldDisplayNames[fieldId] || fieldId}]</span>`;
-                });
-                
-                preview.innerHTML = renderedTemplate;
-                warning.style.display = allRequiredFilled ? 'none' : 'block';
-                copyBtn.disabled = !allRequiredFilled;
-                if (!allRequiredFilled) {
-                    warning.textContent = `⚠️ Required: ${[...missingFieldNames].join(', ')}`;
-                }
-            }
-            
-            // --- CDJR CATALOG FUNCTIONS ---
-            async function loadCdjrCatalog() {
-                const pageContainer = document.getElementById('cdjrCatalogPage');
-                if (pageContainer.querySelector('.catalog-container')) {
-                    // Already rendered
-                    return;
-                }
-
-                pageContainer.innerHTML = `<div class="loader"></div>`;
-
-                try {
-                    const snapshot = await getDocs(cdjrCatalogRef);
-                    if (snapshot.empty) {
-                        pageContainer.innerHTML = `<div class="editor-placeholder"><p>No vehicle data found in the database.</p><p>Run the import script from the console to populate the catalog.</p></div>`;
-                        return;
-                    }
-                    cdjrVehicles = snapshot.docs.map(doc => doc.data());
-                    renderCatalogContent(pageContainer, cdjrVehicles);
-                } catch (error) {
-                    console.error("Error fetching CDJR catalog:", error);
-                    pageContainer.innerHTML = `<div class="editor-placeholder"><p>Error loading vehicle data.</p></div>`;
-                    showToast("Could not load CDJR Catalog.", true);
-                }
-            }
-
-            function renderCatalogContent(container, vehicles) {
-                const brands = [...new Set(vehicles.map(v => v.brand))].sort();
-                
-                let tabsHTML = brands.map((brand, index) => 
-                    `<button data-tab="${brand}" class="catalog-tab-button ${index === 0 ? 'tab-active' : ''}">${brand}</button>`
-                ).join('');
-
-                let contentHTML = brands.map((brand, index) => {
-                    const currentModels = vehicles.filter(v => v.brand === brand && v.category === 'current').sort((a,b) => a.modelName.localeCompare(b.modelName));
-                    const pastModels = vehicles.filter(v => v.brand === brand && v.category === 'past').sort((a,b) => a.modelName.localeCompare(b.modelName));
-                    
-                    const createSectionHTML = (title, models) => {
-                        if (models.length === 0) return '';
-                        const cardsHTML = models.map(v => `
-                            <div class="vehicle-card" data-brand="${v.brand}" data-model="${v.modelName.toLowerCase()}">
-                                <h3>${v.modelName}</h3>
-                                <p class="vehicle-years">${v.years}</p>
-                                <p class="vehicle-desc">${v.description}</p>
-                            </div>
-                        `).join('');
-
-                        return `
-                            <div class="catalog-view-section" data-brand-color="${brand}">
-                                <div class="catalog-section-header">
-                                    <h2>${title}</h2>
-                                    <div class="catalog-view-switcher">
-                                        <button data-view="grid" class="catalog-view-btn view-btn-active"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
-                                        <button data-view="list" class="catalog-view-btn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
-                                    </div>
-                                </div>
-                                <div class="catalog-view-container">${cardsHTML}</div>
-                            </div>
-                        `;
-                    };
-                    
-                    return `
-                        <div id="catalog-${brand}" class="catalog-tab-content ${index !== 0 ? 'hidden' : ''}">
-                            ${createSectionHTML('Current & Future Models', currentModels)}
-                            ${createSectionHTML('Notable Past Models', pastModels)}
-                        </div>
-                    `;
-                }).join('');
-
-                container.innerHTML = `
-                    <div class="catalog-container">
-                        <header class="catalog-header">
-                            <h1>CDJR & Related Brands Vehicle Catalog</h1>
-                            <p>An interactive guide to models from the early 1990s to the present day.</p>
-                             <button id="addVehicleBtn" class="btn btn-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Add Vehicle
-                            </button>
-                        </header>
-                        <div class="catalog-search-container">
-                             <div class="relative">
-                                <div class="search-icon" style="top: 14px; left: 14px;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
-                                <input type="text" id="catalog-search-input" placeholder="Search all vehicles (e.g., 'Viper', 'Cherokee')..." class="input-field" style="padding-left: 48px;">
-                            </div>
-                        </div>
-                        <div class="catalog-tabs">${tabsHTML}</div>
-                        <main id="catalog-content-area">${contentHTML}</main>
-                        <div id="catalog-no-results" class="hidden">
-                            <h3>No vehicles found</h3>
-                            <p>Try adjusting your search term.</p>
-                        </div>
-                    </div>
-                `;
-                attachCatalogEventListeners();
-            }
-
-            function attachCatalogEventListeners() {
-                const tabsContainer = document.querySelector('.catalog-tabs');
-                const searchInput = document.getElementById('catalog-search-input');
-                const addVehicleBtn = document.getElementById('addVehicleBtn');
-                
-                addVehicleBtn.addEventListener('click', showAddVehicleModal);
-
-                tabsContainer.addEventListener('click', e => {
-                    if (e.target.matches('.catalog-tab-button')) {
-                        const tabId = e.target.dataset.tab;
-                        tabsContainer.querySelector('.tab-active').classList.remove('tab-active');
-                        e.target.classList.add('tab-active');
-
-                        document.querySelectorAll('.catalog-tab-content').forEach(p => p.classList.add('hidden'));
-                        document.getElementById(`catalog-${tabId}`).classList.remove('hidden');
-                    }
-                });
-
-                searchInput.addEventListener('input', e => {
-                    const searchTerm = e.target.value.toLowerCase().trim();
-                    const allCards = document.querySelectorAll('.vehicle-card');
-                    let visibleCount = 0;
-
-                    if (searchTerm) {
-                        tabsContainer.classList.add('hidden');
-                        document.querySelectorAll('.catalog-tab-content').forEach(p => p.classList.remove('hidden'));
-                        document.querySelectorAll('.catalog-view-section').forEach(s => s.classList.remove('hidden'));
-                    } else {
-                        tabsContainer.classList.remove('hidden');
-                        const activeTab = tabsContainer.querySelector('.tab-active').dataset.tab;
-                        document.querySelectorAll('.catalog-tab-content').forEach(p => p.classList.toggle('hidden', p.id !== `catalog-${activeTab}`));
-                    }
-                    
-                    allCards.forEach(card => {
-                        const isMatch = card.dataset.model.includes(searchTerm);
-                        card.classList.toggle('hidden', !isMatch);
-                        if (isMatch) visibleCount++;
-                    });
-
-                    document.getElementById('catalog-no-results').classList.toggle('hidden', visibleCount > 0 || !searchTerm);
-                });
-
-                document.querySelectorAll('.catalog-view-switcher').forEach(switcher => {
-                    switcher.addEventListener('click', e => {
-                        const btn = e.target.closest('.catalog-view-btn');
-                        if (!btn) return;
-
-                        const view = btn.dataset.view;
-                        const container = btn.closest('.catalog-view-section').querySelector('.catalog-view-container');
-                        
-                        switcher.querySelector('.view-btn-active').classList.remove('view-btn-active');
-                        btn.classList.add('view-btn-active');
-                        
-                        container.classList.toggle('list-view', view === 'list');
-                    });
-                });
-            }
-
-            function showAddVehicleModal() {
-                const modal = document.getElementById('addVehicleModal');
-                modal.classList.add('visible');
-                // Initialize custom selects within the modal
-                modal.querySelectorAll('.select-wrapper').forEach(buildCustomSelect);
-            }
-
-            function hideAddVehicleModal() {
-                const modal = document.getElementById('addVehicleModal');
-                modal.classList.remove('visible');
-                // Optional: reset form fields
-                document.getElementById('newVehicleModel').value = '';
-                document.getElementById('newVehicleYears').value = '';
-                document.getElementById('newVehicleDescription').value = '';
-                document.getElementById('newVehicleBrand').value = '';
-                document.getElementById('newVehicleCategory').value = '';
-            }
-
-            async function saveNewVehicle() {
-                const brand = document.getElementById('newVehicleBrand').value;
-                const modelName = document.getElementById('newVehicleModel').value.trim();
-                const years = document.getElementById('newVehicleYears').value.trim();
-                const category = document.getElementById('newVehicleCategory').value;
-                const description = document.getElementById('newVehicleDescription').value.trim();
-
-                if (!brand || !modelName || !years || !category || !description) {
-                    showToast("Please fill out all fields.", true);
-                    return;
-                }
-
-                const newVehicle = { brand, modelName, years, category, description };
-
-                try {
-                    await addDoc(cdjrCatalogRef, newVehicle);
-                    showToast("Vehicle added successfully!");
-                    hideAddVehicleModal();
-                    // Refresh data by re-fetching
-                    cdjrVehicles = []; // Clear local cache
-                    loadCdjrCatalog();
-                } catch (error) {
-                    console.error("Error adding vehicle:", error);
-                    showToast("Failed to add vehicle.", true);
-                }
-            }
-
-            let isInitialized = false;
-            function initializeApp() {
-                if (isInitialized) return;
-                isInitialized = true;
-                
-                // --- Event Listeners ---
-                navigateToHotAlerts.addEventListener('click', () => renderCurrentView('hotAlerts'));
-                navigateToTemplateManager.addEventListener('click', () => renderCurrentView('manageTemplates'));
-                navigateToCdjrCatalog.addEventListener('click', () => renderCurrentView('cdjrCatalog'));
-                backToSuiteBtn.addEventListener('click', () => renderCurrentView('toolSuite'));
-
-                document.getElementById('phoneNumber').addEventListener('input', (e) => { const x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/); e.target.value = !x[2] ? x[1] : `(${x[1]}) ${x[2]}` + (x[3] ? `-${x[3]}` : ''); });
-                document.getElementById('vin').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(); });
-                const themeToggle = document.getElementById('themeToggle');
-                themeToggle.addEventListener('click', () => { 
-                    const isLight = body.classList.toggle('light-mode'); 
-                    saveUserPreference('theme', isLight ? 'light' : 'dark');
-                    themeToggle.classList.add('spin'); 
-                    setTimeout(() => themeToggle.classList.remove('spin'), 500); 
-                });
-                
-                cardSearchInput.addEventListener('keyup', (e) => { 
-                    const searchTerm = e.target.value.toLowerCase(); 
-                    document.querySelectorAll('.card').forEach(card => { 
-                        card.style.display = card.dataset.title.includes(searchTerm) ? 'block' : 'none'; 
-                    });
-                });
-                clearSearchBtn.addEventListener('click', () => {
-                    cardSearchInput.value = '';
-                    cardSearchInput.dispatchEvent(new Event('keyup'));
-                });
-
-                templateSelect.addEventListener('change', renderEditorForSelection);
-                document.getElementById('clearAllBtn').addEventListener('click', clearAllFields);
-                addNewTemplateBtn.addEventListener('click', handleAddNewClick);
-                
-                modalConfirmBtn.addEventListener('click', () => { if (confirmCallback) confirmCallback(); });
-                modalCancelBtn.addEventListener('click', hideConfirmationModal);
-
-                document.getElementById('modalCancelAddVehicleBtn').addEventListener('click', hideAddVehicleModal);
-                document.getElementById('modalSaveVehicleBtn').addEventListener('click', saveNewVehicle);
-                
-                document.body.addEventListener('input', (e) => {
-                    if (e.target.matches('.sidebar-content .input-field, .sidebar-content .select-field, .in-card-controls .select-field')) {
-                        updateAllCards();
-                    }
-                });
-            }
-
-            // --- Authentication Flow ---
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                try {
-                    await signInWithEmailAndPassword(auth, email, password);
-                    justAuthenticated = true;
-                } catch (error) { showToast(error.message, true); }
+        // Simple animation for stats
+        document.addEventListener('DOMContentLoaded', function () {
+            const statItems = document.querySelectorAll('.stat-item');
+            statItems.forEach((item, index) => {
+                item.style.transitionDelay = `${index * 100}ms`;
+                item.classList.add('opacity-0', 'translate-y-4');
             });
 
-            signupForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('signupEmail').value;
-                const password = document.getElementById('signupPassword').value;
-                try {
-                    await createUserWithEmailAndPassword(auth, email, password);
-                    justAuthenticated = true;
-                } catch (error) { showToast(error.message, true); }
-            });
-
-            signOutBtn.addEventListener('click', () => {
-                 showConfirmationModal( 'Sign Out', 'Are you sure you want to sign out?',
-                    async () => {
-                        await signOut(auth);
-                        hideConfirmationModal();
-                        showToast("You have been signed out.");
-                    }
-                );
-            });
-
-            showSignupBtn.addEventListener('click', () => {
-                loginForm.classList.add('hidden');
-                signupForm.classList.remove('hidden');
-            });
-
-            showLoginBtn.addEventListener('click', () => {
-                signupForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-            });
-            
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    console.log("User authenticated with UID:", userId);
-                    
-                    const isFreshLogin = justAuthenticated;
-                    if (isFreshLogin) {
-                        showToast("Login successful!");
-                        justAuthenticated = false;
-                    }
-                    
-                    splashScreen.classList.remove('hidden');
-
-                    setTimeout(async () => {
-                        authContainer.classList.add('hidden');
-                        appContainer.classList.remove('hidden');
-                        
-                        initializeApp();
-                        renderCurrentView('toolSuite');
-
-                        try {
-                            const userPath = `artifacts/${appId}/users/${userId}`;
-                            const publicPath = `artifacts/${appId}/public/data`;
-                            
-                            userTemplatesRef = collection(db, `${userPath}/templates`);
-                            publicTemplatesRef = collection(db, `${publicPath}/default_templates`);
-                            cdjrCatalogRef = collection(db, `${publicPath}/cdjr_catalog`);
-                            settingsDocRef = doc(db, `${userPath}/settings`, 'preferences');
-                            
-                            await initializeUserSettings(); 
-                            
-                            const publicSnapshot = await getDocs(publicTemplatesRef);
-                            publicTmpls = publicSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), isPublic: true, isCustom: false }));
-
-                            if (unsubscribeFromTemplates) unsubscribeFromTemplates();
-
-                            unsubscribeFromTemplates = onSnapshot(userTemplatesRef, (userSnapshot) => {
-                                mergeAndRenderTemplates(userSnapshot);
-                            }, (error) => {
-                                console.error("Error with template snapshot listener:", error);
-                                showToast("Error listening for template updates.", true);
-                            });
-                            
-                        } catch (error) {
-                            console.error("Error during data setup:", error);
-                            showToast("Error loading user data.", true);
-                        } finally {
-                            splashScreen.classList.add('hidden');
-                        }
-                    }, isFreshLogin ? 1000 : 100);
-
-                } else {
-                    console.log("No user signed in.");
-                    userId = null;
-                    if (unsubscribeFromTemplates) unsubscribeFromTemplates();
-                    
-                    setTimeout(() => {
-                        splashScreen.classList.add('hidden');
-                        appContainer.classList.add('hidden');
-                        authContainer.classList.remove('hidden');
-                    }, 500);
-                }
-            });
-
+            setTimeout(() => {
+                statItems.forEach(item => {
+                    item.classList.remove('opacity-0', 'translate-y-4');
+                });
+            }, 500);
         });
     </script>
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+    <script type="module">
+        import { initializeFooter } from "./components/main-footer.js";
+        initializeFooter();
+    </script>
+
 </body>
+
 </html>

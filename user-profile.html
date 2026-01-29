@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Scheduler Training Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+        @layer base {
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 47.4% 11.2%;
+            --border: 214.3 31.8% 91.4%;
+        }
+        .dark {
+            --background: 240 10% 3.9%;
+            --foreground: 0 0% 98%;
+            --border: 240 3.7% 15.9%;
+        }
+        body { 
+            @apply bg-white dark:bg-zinc-950 font-['Inter'] text-zinc-900 dark:text-zinc-100 transition-colors duration-300; 
+        }
+    }
+
+    @layer components {
+        /* FIXED DARK MODE HOVER: Matches user-page-2 exactly */
+        .btn-primary {
+            @apply inline-flex items-center justify-center rounded-xl px-7 py-3 text-sm font-extrabold tracking-tight
+                   bg-indigo-600 text-white shadow-[0_10px_20px_-10px_rgba(79,70,229,0.5)]
+                   hover:bg-indigo-700 hover:shadow-[0_15px_25px_-10px_rgba(79,70,229,0.6)]
+                   active:scale-[0.96] transition-all duration-200
+                   /* Dark Mode Specifics */
+                   dark:bg-indigo-600 dark:hover:bg-indigo-500 
+                   dark:shadow-[0_10px_20px_-10px_rgba(99,102,241,0.3)]
+                   dark:hover:shadow-[0_15px_25px_-10px_rgba(99,102,241,0.4)];
+        }
+        
+        .btn-secondary {
+            @apply inline-flex items-center justify-center rounded-xl px-7 py-3 text-sm font-extrabold tracking-tight
+                   bg-neutral-100 text-neutral-400
+                   dark:bg-zinc-800 dark:text-zinc-500
+                   cursor-not-allowed transition-all duration-200
+                   /* Secondary buttons in user-page-2 don't usually have hover if disabled, 
+                      but if enabled, use this: */
+                   border border-transparent dark:border-zinc-700;
+        }
+    }
+    
+    .profile-bg {
+        @apply bg-gradient-to-r from-violet-50 via-white to-amber-50 
+               dark:from-indigo-950/20 dark:via-zinc-950 dark:to-amber-950/20;
+    }
+</style>
+    <style type="text/tailwindcss">
+        @layer components {
+        /* Card Hover Fix */
+        .card-hover-item {
+            @apply p-6 transition-all duration-300 border-b border-neutral-100 dark:border-zinc-800/50
+                hover:bg-neutral-50 dark:hover:bg-zinc-800/40;
+        }
+    }
+</style>
+    <script>
+        tailwind.config = {
+            darkMode: ["class"],
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(var(--border))",
+                        input: "hsl(var(--input))",
+                        ring: "hsl(var(--ring))",
+                        background: "hsl(var(--background))",
+                        foreground: "hsl(var(--foreground))",
+                        primary: { DEFAULT: "#6366f1", foreground: "hsl(var(--primary-foreground))" },
+                        secondary: { DEFAULT: "#f59e0b", foreground: "hsl(var(--secondary-foreground))" },
+                        muted: { DEFAULT: "hsl(var(--muted))", foreground: "hsl(var(--muted-foreground))" },
+                        accent: { DEFAULT: "hsl(var(--accent))", foreground: "hsl(var(--accent-foreground))" },
+                    },
+                    borderRadius: { lg: "var(--radius)", md: "calc(var(--radius) - 2px)", sm: "calc(var(--radius) - 4px)" },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                },
+            },
+        }
+    </script>
+
+    <script>
+            // PRE-LOAD THEME CHECK
+            (function () {
+                const savedTheme = localStorage.getItem('theme');
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.classList.add('dark');
+                }
+            })();
+    </script>
+
+</head>
+
+<body class="min-h-screen flex flex-col">
+    <div id="splash-screen"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-white dark:bg-zinc-950 transition-opacity duration-700">
+        <div class="flex flex-col items-center">
+            <div class="mb-4">
+                <span class="text-2xl font-bold">
+                    <span class="text-indigo-600">Scheduler</span><span class="text-amber-500">TrainingHub</span>
+                </span>
+            </div>
+            <div class="w-12 h-12 border-4 border-indigo-600/20 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p class="mt-4 text-sm font-medium text-zinc-500 dark:text-zinc-400 animate-pulse">
+                Loading User Profile...
+            </p>
+        </div>
+    </div>
+    <div id="header-container"></div>
+
+    <main class="min-h-screen flex flex-col">
+        <section id="profile-section" class="flex flex-col">
+            <div class="relative h-48 profile-bg border-b border-neutral-100 dark:border-zinc-800"></div>
+            </div>
+
+            <div class="max-w-[1600px] mx-auto px-6 -mt-16 relative z-10 w-full grow">
+
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-6 mb-12">
+                    <div id="profile-avatar"
+                        class="h-32 w-32 rounded-full bg-indigo-600 border-4 border-white shadow-xl flex items-center justify-center text-white text-4xl font-bold">
+                        NC
+                    </div>
+
+                    <div class="flex flex-col items-center md:items-start pt-4">
+                        <h1 id="profile-full-name"
+                            class="text-3xl font-extrabold mb-2 text-zinc-900 dark:text-white tracking-tight">Nadz
+                            Cantos</h1>
+
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-2 text-neutral-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path
+                                        d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <path d="m22 6-10 7L2 6" />
+                                </svg>
+                                <span id="profile-email"
+                                    class="text-sm font-medium text-neutral-500 dark:text-zinc-400">nadz.cantos@example.com</span>
+
+
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="ml-2">
+                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                                    <path d="M16 2v4M8 2v4M3 10h18" />
+                                </svg>
+                                <span class="text-sm font-medium text-neutral-500 dark:text-zinc-400">Joined: <span
+                                        id="profile-joined-date">January 28, 2026</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl shadow-sm overflow-hidden mb-20">
+                    <div
+                        class="p-6 border-b border-neutral-100 dark:border-zinc-800 flex justify-between items-center bg-neutral-50/50 dark:bg-zinc-900/50">
+                        <h3 class="text-lg font-bold text-zinc-900 dark:text-white">My Training Journey</h3>
+                        <p class="text-xs font-bold text-neutral-500">View progress and download certificates</p>
+                    </div>
+
+                    <div id="profile-modules-list" class="divide-y divide-neutral-100 dark:divide-zinc-800">
+
+                        <div class="card-hover-item">
+                            <div class="flex items-center gap-4 min-w-[250px]">
+                                <div
+                                    class="h-12 w-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-500/20">
+                                    X</div>
+                                <div>
+                                    <h4 class="font-bold text-zinc-900 dark:text-white">Xtime Scheduler</h4>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-8 grow justify-between md:justify-end px-4">
+
+                                <div class="flex flex-col gap-1 min-w-[120px]">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Last
+                                        Date Updated</span>
+                                    <span
+                                        class="text-xs font-semibold text-zinc-700 dark:text-zinc-300">01/15/2024</span>
+                                </div>
+                                <div class="flex flex-col gap-1.5 w-full md:w-48">
+                                    <div
+                                        class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                                        <span>Progress</span>
+                                        <span class="text-indigo-600 dark:text-indigo-400">0%</span>
+                                    </div>
+                                    <div class="h-2 bg-neutral-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                        <div
+                                            class="h-full bg-indigo-600 dark:bg-indigo-500 w-0 transition-all duration-500">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button class="btn-secondary flex items-center gap-2 opacity-50" disabled>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                                            stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                                            class="text-neutral-300 dark:text-zinc-600">
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                        <span>Locked</span>
+                                    </button>
+
+                                    <button class="btn-primary">Start Module</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            </div>
+        </section>
+    </main>
+    <div id="footer-container"></div>
+
+    <script type="module">
+        import { auth, db } from "./components/firebase-init.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        import { initializeHeader } from "./components/header.js";
+        import { initializeFooter } from "./components/footer.js";
+        import { initializeTheme } from "./components/theme-manager.js";
+        import { initializeLogout } from "./components/logout.js";
+
+        initializeHeader();
+        initializeFooter();
+        initializeTheme();
+        initializeLogout();
+
+        const hideSplashScreen = () => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.classList.add('opacity-0');
+                setTimeout(() => { splash.style.display = 'none'; }, 700);
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // 1. Fetch User Data (Profile & Dropdown PERSISTENCE)
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        const fullName = `${data.firstName} ${data.lastName}`;
+                        const initials = (data.firstName[0] + data.lastName[0]).toUpperCase();
+
+                        // Update Header Dropdown
+                        const headerInitials = document.getElementById('user-initials');
+                        if (headerInitials) headerInitials.textContent = initials;
+                        const dropName = document.getElementById('dropdown-full-name');
+                        const dropEmail = document.getElementById('dropdown-email');
+                        if (dropName) dropName.textContent = fullName;
+                        if (dropEmail) dropEmail.textContent = user.email;
+
+                        // Update Profile Page Header
+                        document.getElementById('profile-full-name').textContent = fullName;
+                        document.getElementById('profile-email').textContent = user.email;
+                        document.getElementById('profile-avatar').textContent = initials;
+
+                        if (data.createdAt) {
+                            const date = data.createdAt.toDate();
+                            document.getElementById('profile-joined-date').textContent =
+                                date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                        }
+                    }
+
+// 1. URL MAPPING: Add this at the top of your logic to handle custom file names
+const urlMap = {
+    "Autoloop": "autoloop-module.html",
+    "CDK": "cdk-dashboard.html",
+    "Dealerlogix": "dealerlogix-training.html",
+    "MyKaarma": "mykaarma-module.html",
+    "Online": "online-module.html",
+    "Tekion": "tekion-training.html",
+    "Wi Advisor": "wi-advisor-module.html",
+    "Xtime": "xtime-module.html",
+    // The code will fallback to 'id-module.html' if not listed here
+};
+
+// 2. Load and Process Modules
+const modulesListContainer = document.getElementById('profile-modules-list');
+const modulesSnapshot = await getDocs(collection(db, "module_progress", user.uid, "modules"));
+
+modulesListContainer.innerHTML = '';
+let modulesArray = [];
+
+modulesSnapshot.forEach((docSnap) => {
+    const modData = docSnap.data();
+    const progress = modData.progress || 0;
+    const completion = modData.completion || false;
+
+    // RULE: Only include if progress has started or is completed
+    if (completion === true || progress > 0) {
+        modulesArray.push({
+            id: docSnap.id,
+            ...modData,
+            // Sort by lastUpdated timestamp
+            sortDate: modData.lastUpdated ? modData.lastUpdated.toDate() : new Date(0)
+        });
+    }
+});
+
+// --- SORTING: Most Recent First ---
+modulesArray.sort((a, b) => b.sortDate - a.sortDate);
+
+if (modulesArray.length === 0) {
+    // 3. SHOW EMPTY STATE MESSAGE
+    modulesListContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <div class="h-16 w-16 bg-neutral-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5S19.832 5.477 21 6.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+            </div>
+            <h3 class="text-zinc-900 dark:text-white font-bold">No Active Modules</h3>
+            <p class="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Start your training from the dashboard to see progress here.</p>
+        </div>`;
+} else {
+    modulesArray.forEach((modData) => {
+        const moduleId = modData.id;
+        const progress = modData.progress || 0;
+        const completion = modData.completion || false;
+        const score = modData.score || 0;
+        const cItem = modData.Citem || 0;
+        const qItem = modData.Qitem || 40;
+
+        const displayName = modData.module_display_name || "Unknown";
+        const avatarInitial = displayName.charAt(0).toUpperCase();
+        const schedulerName = `${displayName} Scheduler`;
+
+        // Format Date (MM/DD/YYYY)
+        const lastUpdateStr = modData.sortDate.toLocaleDateString('en-US', {
+            month: '2-digit', day: '2-digit', year: 'numeric'
+        });
+
+        // Determine URL using urlMap or Fallback
+        const targetUrl = urlMap[moduleId] || `${moduleId.toLowerCase()}-module.html`;
+
+        // Button Styles
+        const baseBtn = "inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-[11px] font-extrabold tracking-tight transition-all duration-200 active:scale-95 w-full shadow-lg";
+        
+        const statusBtnClass = completion 
+            ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20" 
+            : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20";
+
+        const certBtnClass = completion
+            ? "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20"
+            : "bg-neutral-100 dark:bg-zinc-800 text-neutral-400 dark:text-zinc-600 cursor-not-allowed opacity-50";
+
+        const moduleRow = `
+            <div class="card-hover-item">
+                <div class="grid grid-cols-1 md:grid-cols-12 items-center w-full gap-4 md:gap-0">
+                    
+                    <div class="md:col-span-3 flex items-center gap-4">
+                        <div class="h-11 w-11 flex-shrink-0 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-500/20">
+                            ${avatarInitial}
+                        </div>
+                        <div class="truncate">
+                            <h4 class="font-bold text-zinc-900 dark:text-white truncate text-sm md:text-base">${schedulerName}</h4>
+                            <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">Estimated: 35 min</p>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 flex flex-col gap-0.5">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Last Update</span>
+                        <span class="text-xs font-semibold text-zinc-700 dark:text-zinc-300">${lastUpdateStr}</span>
+                    </div>
+
+                    <div class="md:col-span-2 flex flex-col gap-1.5">
+                        <div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                            <span>Progress</span>
+                            <span class="text-indigo-600">${progress}%</span>
+                        </div>
+                        <div class="h-1.5 bg-neutral-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-indigo-600 transition-all duration-500" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 flex flex-col gap-0.5 md:pl-10">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Score</span>
+                        <span class="text-xs font-bold whitespace-nowrap ${completion ? 'text-emerald-500' : 'text-zinc-400'}">
+                            ${cItem} out of ${qItem} - ${score}%
+                        </span>
+                    </div>
+
+                    <div class="md:col-span-3 flex items-center gap-4 justify-end">
+                        <button 
+                            onclick="if(${completion}) window.location.href='certificate.html?module=${moduleId}'"
+                            class="${certBtnClass} ${baseBtn} min-w-[115px]"
+                            ${!completion ? 'disabled' : ''}>
+                            Certificate
+                        </button>
+                        <button 
+                            onclick="window.location.href='${targetUrl}'"
+                            class="${statusBtnClass} ${baseBtn} min-w-[115px]">
+                            ${completion ? 'Completed' : 'Resume'}
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        `;
+        modulesListContainer.insertAdjacentHTML('beforeend', moduleRow);
+    });
+}
+
+            hideSplashScreen();
+
+        } catch (error) {
+            console.error("Critical Error:", error);
+            hideSplashScreen();
+        }
+    } else {
+        window.location.href = "sign.html";
+    }
+});
+    </script>
+    </script>
+</body>
+
+</html>

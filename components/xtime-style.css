@@ -1,0 +1,540 @@
+/* Custom Variables for Video Player Theme */
+:root {
+    /* Matching Tailwind primary (#6366f1) and secondary (#f59e0b) */
+    --tw-primary: #6366f1;
+    --tw-secondary: #f59e0b;
+
+    /* Dark theme colors for the player popup */
+    --bg-dark: #0f172a;
+    --bg-panel: #020617;
+    --bg-item: #020617;
+    --bg-item-hover: #1e293b;
+    --accent: var(--tw-primary);
+    /* Use primary for accent */
+    --text-main: #e5e7eb;
+    --text-muted: #94a3b8;
+    --radius: 18px;
+}
+
+/* Timeline Styles (Existing) */
+.timeline-container {
+    position: relative;
+    padding: 40px 0;
+}
+
+.timeline-card {
+    position: relative;
+    margin-bottom: 40px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+}
+
+.timeline-card.left {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+}
+
+.timeline-card.right {
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+}
+
+.timeline-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    height: 160px;
+    max-width: 500px;
+}
+
+.timeline-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.timeline-number {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(to right, #6366f1, #f59e0b);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Shop Card Styles (Existing) */
+.shop-card {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.shop-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shop-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.shop-icon i {
+    width: 24px;
+    height: 24px;
+}
+
+.shop-title {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.shop-description {
+    color: #6b7280;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.shop-tag {
+    display: inline-block;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Transportation Grid Styles (Existing) */
+.transportation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.transportation-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.transportation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.transportation-icon {
+    width: 48px;
+    height: 48px;
+    background-color: rgba(245, 158, 11, 0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.transportation-icon i {
+    width: 20px;
+    height: 20px;
+}
+
+.transportation-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #f59e0b;
+}
+
+.transportation-description {
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+/* Responsive adjustments (Existing) */
+@media (max-width: 768px) {
+
+    .timeline-card.left,
+    .timeline-card.right {
+        padding: 0;
+        margin: 0 0 40px 0;
+    }
+
+    .timeline-number {
+        left: 20px;
+        transform: none;
+    }
+
+    .transportation-card {
+        flex-direction: column;
+    }
+
+    .transportation-icon {
+        margin-bottom: 16px;
+    }
+}
+
+/* Video Player Styles (Existing) */
+.video-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 23, .85);
+    backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.video-overlay.active {
+    display: flex;
+}
+
+.video-player {
+    width: 90vw;
+    height: 90vh;
+    background: var(--bg-dark);
+    border-radius: var(--radius);
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    overflow: hidden;
+    box-shadow: 0 40px 120px rgba(0, 0, 0, .7);
+    animation: scaleIn .25s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.playlist {
+    background: var(--bg-panel);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+.playlist h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.player-main {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    padding: 24px;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius);
+    background: black;
+}
+
+.player-header {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+}
+
+.close-btn {
+    background: rgba(2, 6, 23, .8);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: linear-gradient(to top, rgba(2, 6, 23, .9), transparent);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 10;
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    color: white;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.progress {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, .2);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    border-radius: 4px;
+}
+
+.time-display {
+    min-width: 100px;
+    text-align: center;
+    color: white;
+}
+
+@media (max-width: 900px) {
+    .video-player {
+        grid-template-columns: 1fr;
+    }
+
+    .playlist {
+        display: none;
+    }
+}
+
+/* Custom Scrollbar Styles for Uniformity (WebKit Browsers) (Existing) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-panel);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--tw-primary);
+    border-radius: 10px;
+    border: 2px solid var(--bg-panel);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #7c7ff9;
+}
+
+/* ---------------------------------------------------------------------- */
+/* NEW CUSTOM WARNING MODAL STYLES (Existing) */
+/* ---------------------------------------------------------------------- */
+
+.custom-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.custom-modal-content {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+}
+
+.custom-modal-content .modal-close-btn {
+    margin-top: 20px;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.custom-modal-overlay.hidden {
+    display: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* CORRECTED VIDEO PLAYLIST UI STYLES (Includes the Glow/Pause/Completed logic + Hover fix) */
+/* ---------------------------------------------------------------------- */
+
+/* Define the glowing animation */
+@keyframes glowing-red {
+    0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5), 0 0 10px rgba(255, 0, 0, 0.2); }
+    50% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 0 0 25px rgba(255, 0, 0, 0.4); }
+    100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5), 0 0 10px rgba(255, 0, 0, 0.2); }
+}
+
+/* 1. Base style for the video item */
+.video-item {
+    padding: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: var(--bg-item);
+    transition: all .25s ease;
+    border: 1px solid transparent; /* Base border for clean transition/glow */
+    
+    display: flex !important; 
+    align-items: center; 
+    justify-content: space-between;
+    color: var(--text-main);
+    flex-direction: row !important; 
+}
+
+/* 2. Style when NOT ACTIVE and HOVERED (Re-introduces hover effect and subtle edge highlight) */
+.video-item:not(.active):hover {
+    background: var(--bg-item-hover);
+    transform: translateX(2px);
+    border-color: rgba(99, 102, 241, .4); /* Subtle blue edge highlight on hover */
+}
+
+/* 3. Style when the video is ACTIVE (either playing or paused) */
+.video-item.active {
+    background: rgba(99, 102, 241, .15); /* Light background to indicate selection */
+    border-color: var(--text-muted); /* Gray border for paused state */
+    animation: none;
+    /* Must ensure active state overrides hover transition/transform */
+    transform: none; 
+}
+
+/* 4. Style when the video is PLAYING (Red Glow Effect) */
+.video-item.active.playing {
+    border-color: #ff0000; /* Red border */
+    animation: glowing-red 1.5s infinite alternate; /* Apply the glow animation */
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5); 
+}
+
+/* 5. Group container for Title and Length (LEFT side) */
+.video-content-group {
+    display: flex;
+    flex-direction: column; 
+    gap: 4px;
+    flex-grow: 1; 
+    min-width: 0; 
+    margin-right: 12px; 
+}
+
+/* Style for the Title element */
+.video-content-group .video-title {
+    font-weight: 600; 
+    line-height: 1.2;
+    transition: color 0.15s ease;
+}
+
+/* Highlight Title when item is active */
+.video-item.active .video-content-group .video-title {
+    color: var(--tw-primary); 
+}
+
+/* Style for the Length element within the group */
+.video-content-group span {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* --- COMPLETED BADGE STYLE (RIGHT side) --- */
+.completion-label {
+    display: flex;
+    align-items: center;
+    color: var(--tw-primary);
+    font-size: 14px; 
+    font-weight: 600;
+    flex-shrink: 0; 
+}
+
+/* Hide the label by default (managed by JS to show only on watched videos) */
+.completion-label.hidden {
+    display: none !important;
+}
+
+/* Ensure the disabled button looks and acts disabled (Existing) */
+.pointer-events-none {
+    pointer-events: none;
+    cursor: not-allowed !important;
+}
+
+/* Pop up Window design */
+/* Removes the default focus outline and applies the rounded theme */
+#dealership-select {
+    background-image: none;
+}
+
+/* For Dark Mode compatibility */
+.dark #dealership-select option {
+    background-color: #18181b; /* zinc-900 */
+    color: #f4f4f5; /* zinc-100 */
+}
+
+/* Adds a slight hover effect to the select box itself */
+#dealership-select:hover {
+    background-color: #f0f2ff; /* indigo-50 */
+    border-color: #6366f1; /* primary */
+}
+
+.dark #dealership-select:hover {
+    background-color: #27272a; /* zinc-800 */
+}
+
+#video-player {
+    transform: translateZ(0); /* Forces the video into its own GPU layer */
+    will-change: transform;
+    backface-visibility: hidden;
+}
