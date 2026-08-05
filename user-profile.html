@@ -428,6 +428,53 @@
             transform: rotate(-10deg);
         }
 
+        .cert-seal-autoloop {
+
+            width: 60px;
+            height: 60px;
+
+            background:
+                radial-gradient(circle,
+                    #10b981 0%,
+                    #059669 100%);
+
+            border-radius: 50%;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border: 2px dashed white;
+
+            color: white;
+            font-weight: 700;
+
+            box-shadow:
+                0 0 15px rgba(16, 185, 129, .5);
+
+            transform: rotate(-10deg);
+        }
+
+        .cert-name-autoloop {
+
+            font-size: 32px;
+            font-weight: 700;
+
+            color: #10b981;
+
+            margin-top: 40px;
+
+            border-bottom:
+                2px solid rgba(255, 255, 255, .1);
+
+            width: 80%;
+
+            padding-bottom: 8px;
+
+            text-shadow:
+                0 0 10px rgba(16, 185, 129, .4);
+        }
+
         @media print {
 
             body * {
@@ -549,7 +596,7 @@
             MODULE_REGISTRY: [
                 { name: "CDK Scheduler", status: "active", slug: "cdk", est: "35 MIN", initial: "C" },
                 { name: "Xtime Scheduler", status: "active", slug: "xtime", est: "35 MIN", initial: "X" },
-                { name: "Autoloop Scheduler", status: "inactive", slug: "autoloop", est: "-- MIN", initial: "A" },
+                { name: "Autoloop Scheduler", status: "active", slug: "autoloop", est: "35 MIN", initial: "A" },
                 { name: "Dealerlogix Scheduler", status: "inactive", slug: "dealerlogix", est: "-- MIN", initial: "D" },
                 { name: "MyKaarma Scheduler", status: "inactive", slug: "myKaarma", est: "-- MIN", initial: "M" },
                 { name: "Online Scheduler", status: "inactive", slug: "online scheduler", est: "-- MIN", initial: "O" },
@@ -565,7 +612,8 @@
         //--- Module mapping ---
         const MODULE_FIREBASE_MAP = {
             cdk: "CDK",
-            xtime: "Xtime"
+            xtime: "Xtime",
+            autoloop: "Autoloop"
         };
 
         /**
@@ -1046,35 +1094,42 @@
             completionDate
         ) {
 
-            const isCDK =
-                module.slug === "cdk";
+            const isCDK = module.slug === "cdk";
+            const isAutoloop = module.slug === "autoloop";
+            // Xtime is the fallback for anything that is neither CDK nor Autoloop
 
-            const verificationId =
-                isCDK
-                    ? `CDK-${Math.floor(10000 + Math.random() * 90000)
-                        .toString(16)
-                        .toUpperCase()}`
-                    : `XT-${Math.floor(10000 + Math.random() * 90000)
-                        .toString(16)
-                        .toUpperCase()}`;
+            let verificationId;
+            if (isCDK) {
+                verificationId = `CDK-${Math.floor(10000 + Math.random() * 90000).toString(16).toUpperCase()}`;
+            } else if (isAutoloop) {
+                verificationId = `ALS-${Math.floor(10000 + Math.random() * 90000).toString(16).toUpperCase()}`;
+            } else {
+                verificationId = `XT-${Math.floor(10000 + Math.random() * 90000).toString(16).toUpperCase()}`;
+            }
 
-            const dealerText =
-                isCDK
-                    ? "has successfully completed all training modules, navigation simulations, and the dealer business policy examinations for Tarrytown Honda and Mike Piazza Honda."
-                    : "has successfully completed all training modules, navigation simulations, and the dealer business policy examinations for Hudson Honda and Warrenton Toyota.";
+            let dealerText;
+            if (isCDK) {
+                dealerText = "has successfully completed all training modules, navigation simulations, and the dealer business policy examinations for Tarrytown Honda and Mike Piazza Honda.";
+            } else if (isAutoloop) {
+                dealerText = "has successfully completed all Autoloop Scheduler training modules, navigation simulations, and the dealer business policy examinations for Tarrytown Honda and Mike Piazza Honda.";
+            } else {
+                dealerText = "has successfully completed all training modules, navigation simulations, and the dealer business policy examinations for Hudson Honda and Warrenton Toyota.";
+            }
 
-            const sealText =
-                isCDK ? "CDK" : "XT";
-
-            const sealClass =
-                isCDK
-                    ? "cert-seal-cdk"
-                    : "cert-seal-xtime";
-
-            const nameClass =
-                isCDK
-                    ? "cert-name-cdk"
-                    : "cert-name-xtime";
+            let sealText, sealClass, nameClass;
+            if (isCDK) {
+                sealText = "CDK";
+                sealClass = "cert-seal-cdk";
+                nameClass = "cert-name-cdk";
+            } else if (isAutoloop) {
+                sealText = "ALS";
+                sealClass = "cert-seal-autoloop";
+                nameClass = "cert-name-autoloop";
+            } else {
+                sealText = "XT";
+                sealClass = "cert-seal-xtime";
+                nameClass = "cert-name-xtime";
+            }
 
             return `
                 <div id="certificate-print-area">
